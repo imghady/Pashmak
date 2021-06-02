@@ -16,6 +16,5 @@ public class DesktopLauncher {
 		Initializer.addUsers();
 		new LwjglApplication(new Pashmak(), config);
 		Finisher.finish();
-		System.out.println("111111111");
 	}
 }

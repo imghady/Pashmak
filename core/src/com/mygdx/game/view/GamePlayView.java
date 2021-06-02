@@ -63,7 +63,7 @@ public class GamePlayView implements Screen {
 
     public GamePlayView(Pashmak pashmak ,User currentLoggedInUser) {
         this.currentLoggedInUser = currentLoggedInUser;
-        text = new BitmapFont();
+        text = new BitmapFont(Gdx.files.internal("times.fnt"));
         pacman = new Rectangle();
         pacman.x = 800 / 2 - 64 / 2 + 40;
         pacman.y = 800 / 2 - 64 / 2;
@@ -194,7 +194,7 @@ public class GamePlayView implements Screen {
         batch.draw(pacmanImage, pacman.x, pacman.y);
         batch.end();
         batch.begin();
-        text.draw(batch, "score : " + score + "\nhealth : " + health, 20, 780);
+        text.draw(batch, "score : " + score + "\nhealth : " + health, 20, 790);
         batch.end();
 
         batch.begin();

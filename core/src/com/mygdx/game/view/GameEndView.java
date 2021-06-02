@@ -9,6 +9,7 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.mygdx.game.Pashmak;
+import com.mygdx.game.model.Score;
 import com.mygdx.game.model.User;
 
 public class GameEndView implements Screen {
@@ -25,7 +26,7 @@ public class GameEndView implements Screen {
         this.user = user;
         this.score = score;
         this.game = game;
-        text = new BitmapFont();
+        text = new BitmapFont(Gdx.files.internal("times.fnt"));
         text.setColor(Color.RED);
         batch = new SpriteBatch();
         camera = new OrthographicCamera();
@@ -57,6 +58,8 @@ public class GameEndView implements Screen {
             if (user.isNewHighScore(score)) {
                 isNewHighScore = true;
             }
+            new Score(score, user);
+            System.out.println("111111");
         }
 
         if (isNewHighScore) {
@@ -71,11 +74,10 @@ public class GameEndView implements Screen {
                 if (Gdx.input.getX() > 10 && Gdx.input.getX() < 10 + backButton.getWidth()) {
                     if (user == null) {
                         game.setScreen(new WelcomeMenuView(game));
-                        dispose();
                     } else {
                         game.setScreen(new MainMenuView(game, user));
-                        dispose();
                     }
+                    dispose();
                 }
             }
         }

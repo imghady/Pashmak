@@ -20,13 +20,14 @@ public class MainMenuView implements Screen {
     Texture unmute;
     boolean isMute = false;
     Texture play;
+    Texture scoreboard;
     Music music;
     User currentLoggedInUser;
 
     public MainMenuView(Pashmak game, User currentLoggedInUser) {
         this.currentLoggedInUser = currentLoggedInUser;
         this.game = game;
-        text = new BitmapFont();
+        text = new BitmapFont(Gdx.files.internal("times.fnt"));
         batch = new SpriteBatch();
         camera = new OrthographicCamera();
         camera.setToOrtho(false, 800, 800);
@@ -35,6 +36,7 @@ public class MainMenuView implements Screen {
         play = new Texture("play.png");
         music = Gdx.audio.newMusic(Gdx.files.internal("music.mp3"));
         music.setLooping(true);
+        scoreboard = new Texture("scoreboard.png");
     }
 
 
@@ -53,6 +55,8 @@ public class MainMenuView implements Screen {
 
         batch.begin();
         batch.draw(play, 300, 350, play.getWidth(), play.getHeight());
+        batch.draw(scoreboard, 215, 230, (float) (scoreboard.getWidth() * 0.8), (float) (scoreboard.getHeight() * 0.8));
+
         batch.end();
 
         batch.begin();
@@ -81,6 +85,12 @@ public class MainMenuView implements Screen {
             if (Gdx.input.getX() > 300 && Gdx.input.getX() < 300 + play.getWidth()
                     && Gdx.input.getY() < 450 && Gdx.input.getY() > 450 - play.getHeight()) {
                 game.setScreen(new GamePlayView(game, currentLoggedInUser));
+                dispose();
+            }
+
+            if (Gdx.input.getX() > 215 && Gdx.input.getX() < 215 + scoreboard.getWidth()
+                    && Gdx.input.getY() < 570 && Gdx.input.getY() > 570 - scoreboard.getHeight()) {
+                game.setScreen(new ScoreboardView(game, currentLoggedInUser));
                 dispose();
             }
         }
