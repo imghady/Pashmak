@@ -1,6 +1,7 @@
 package com.mygdx.game.view;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.graphics.OrthographicCamera;
@@ -11,7 +12,7 @@ import com.badlogic.gdx.utils.ScreenUtils;
 import com.mygdx.game.Pashmak;
 import com.mygdx.game.model.User;
 
-public class MainMenuView implements Screen {
+public class MainMenuView implements Screen, Input.TextInputListener {
     SpriteBatch batch;
     final Pashmak game;
     OrthographicCamera camera;
@@ -23,6 +24,12 @@ public class MainMenuView implements Screen {
     Texture scoreboard;
     Music music;
     User currentLoggedInUser;
+    Texture logout;
+    Texture deleteAccount;
+    String holder = "";
+    boolean isPrintDeleteAccount = false;
+    Texture changePassword;
+    Texture bin;
 
     public MainMenuView(Pashmak game, User currentLoggedInUser) {
         this.currentLoggedInUser = currentLoggedInUser;
@@ -37,6 +44,10 @@ public class MainMenuView implements Screen {
         music = Gdx.audio.newMusic(Gdx.files.internal("music.mp3"));
         music.setLooping(true);
         scoreboard = new Texture("scoreboard.png");
+        logout = new Texture("logout.png");
+        deleteAccount = new Texture("deleteaccount.png");
+        changePassword = new Texture("change.png");
+        bin = new Texture("bin.png");
     }
 
 
@@ -56,11 +67,18 @@ public class MainMenuView implements Screen {
         batch.begin();
         batch.draw(play, 300, 350, play.getWidth(), play.getHeight());
         batch.draw(scoreboard, 215, 230, (float) (scoreboard.getWidth() * 0.8), (float) (scoreboard.getHeight() * 0.8));
-
+        batch.draw(logout, 0, 0, logout.getWidth(), logout.getHeight());
+        batch.draw(deleteAccount, 500, 0, deleteAccount.getWidth(), deleteAccount.getHeight());
+        batch.draw(changePassword, 230, 150, changePassword.getWidth(), changePassword.getHeight());
         batch.end();
 
         batch.begin();
         text.draw(batch, "main menu\nusername : " + currentLoggedInUser.getUsername() + "\nyour high score : " + currentLoggedInUser.getHighScore(), 200, 700);
+
+        if (isPrintDeleteAccount) {
+            text.draw(batch, "tap again to delete!", 430, 100);
+            batch.draw(bin, 700, 50, bin.getWidth(), bin.getHeight());
+        }
         batch.end();
 
 
@@ -93,6 +111,37 @@ public class MainMenuView implements Screen {
                 game.setScreen(new ScoreboardView(game, currentLoggedInUser));
                 dispose();
             }
+
+            if (Gdx.input.getX() > 230 && Gdx.input.getX() < 230 + changePassword.getWidth()
+                    && Gdx.input.getY() < 650 && Gdx.input.getY() > 650 - changePassword.getHeight()) {
+                game.setScreen(new changePasswordView(game, currentLoggedInUser));
+                dispose();
+            }
+
+            if (Gdx.input.getX() > 700 && Gdx.input.getX() < 700 + bin.getWidth()
+                    && Gdx.input.getY() < 750 && Gdx.input.getY() > 750 - bin.getHeight()) {
+                if (holder.equals(currentLoggedInUser.getPassword())) {
+                    User.deleteUser(currentLoggedInUser);
+                    User.allUsers.remove(currentLoggedInUser);
+                    game.setScreen(new WelcomeMenuView(game));
+                    dispose();
+                } else {
+                    isPrintDeleteAccount = false;
+                }
+            }
+
+            if (Gdx.input.getX() > 0 && Gdx.input.getX() < logout.getWidth()
+                    && Gdx.input.getY() < 800 && Gdx.input.getY() > 800 - logout.getHeight()) {
+                game.setScreen(new WelcomeMenuView(game));
+                dispose();
+            }
+
+            if (Gdx.input.getX() > 500 && Gdx.input.getX() < 500 + deleteAccount.getWidth()
+                    && Gdx.input.getY() < 800 && Gdx.input.getY() > 800 - deleteAccount.getHeight()) {
+                Gdx.input.getTextInput(this, "enter your password", "", "");
+                isPrintDeleteAccount = true;
+
+            }
         }
 
     }
@@ -119,6 +168,16 @@ public class MainMenuView implements Screen {
 
     @Override
     public void dispose() {
+
+    }
+
+    @Override
+    public void input(String text) {
+        this.holder = text;
+    }
+
+    @Override
+    public void canceled() {
 
     }
 }

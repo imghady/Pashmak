@@ -28,6 +28,7 @@ public class RegisterView implements Screen, Input.TextInputListener {
     boolean isHolderPassword = false;
     Texture register;
     int message = 0;
+    boolean isFirstTime = true;
 
     public RegisterView(Pashmak game) {
         this.game = game;
@@ -79,7 +80,10 @@ public class RegisterView implements Screen, Input.TextInputListener {
             batch.end();
         } else if (message == 2) {
             try {
-                new User(username, password);
+                if (isFirstTime) {
+                    new User(username, password);
+                    isFirstTime = false;
+                }
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -108,12 +112,10 @@ public class RegisterView implements Screen, Input.TextInputListener {
                     if (Gdx.input.getY() > 400 - registerButtons.getHeight() && Gdx.input.getY() < 400 - registerButtons.getHeight() / 2) {
                         isHolderUsername = true;
                         Gdx.input.getTextInput(this, "username", "", "");
-                        System.out.println(holder);
                     }
                     if (Gdx.input.getY() > 400 - registerButtons.getHeight() / 2 && Gdx.input.getY() < 400) {
                         isHolderPassword = true;
                         Gdx.input.getTextInput(this, "password", "", "");
-                        System.out.println(holder);
                     }
                 }
 

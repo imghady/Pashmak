@@ -18,8 +18,9 @@ public class Score {
         allScores.add(this);
     }
 
-    public void sortAllScores() {
+    public static void sortAllScores(ArrayList<Score> highScores) {
         allScores.sort(new SortScore());
+        highScores.sort(new SortScore());
     }
 
     public int getScore() {

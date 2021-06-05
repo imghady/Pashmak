@@ -2,6 +2,7 @@ package com.mygdx.game.model;
 
 import com.mygdx.game.controller.Finisher;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 
@@ -65,5 +66,22 @@ public class User {
 
     public static void addToAllUsers(User user) {
         allUsers.add(user);
+    }
+
+    public static void deleteUser(User user) {
+        allUsers.remove(user);
+        for (User allUser : allUsers) {
+            if (allUser.getUsername().equals(user.getUsername())) {
+                allUsers.remove(user);
+            }
+        }
+        System.out.println("111");
+        String fileAddress = "users/" + user.getUsername() + ".json";
+        File userFile = new File(fileAddress);
+        userFile.delete();
+    }
+
+    public void setHighScore(int highScore) {
+        this.highScore = highScore;
     }
 }

@@ -108,12 +108,10 @@ public class LoginView implements Screen, Input.TextInputListener {
                     if (Gdx.input.getY() > 400 - registerButtons.getHeight() && Gdx.input.getY() < 400 - registerButtons.getHeight() / 2) {
                         isHolderUsername = true;
                         Gdx.input.getTextInput(this, "username", "", "");
-                        System.out.println(holder);
                     }
                     if (Gdx.input.getY() > 400 - registerButtons.getHeight() / 2 && Gdx.input.getY() < 400) {
                         isHolderPassword = true;
                         Gdx.input.getTextInput(this, "password", "", "");
-                        System.out.println(holder);
                     }
                 }
 

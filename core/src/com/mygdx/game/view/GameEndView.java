@@ -9,8 +9,11 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.mygdx.game.Pashmak;
+import com.mygdx.game.controller.Finisher;
 import com.mygdx.game.model.Score;
 import com.mygdx.game.model.User;
+
+import java.io.IOException;
 
 public class GameEndView implements Screen {
     int score;
@@ -21,6 +24,7 @@ public class GameEndView implements Screen {
     Texture backButton;
     User user;
     boolean isNewHighScore = false;
+    boolean isFirstTime = true;
 
     public GameEndView(Pashmak game, int score, User user) {
         this.user = user;
@@ -57,9 +61,17 @@ public class GameEndView implements Screen {
         } else {
             if (user.isNewHighScore(score)) {
                 isNewHighScore = true;
+                user.setHighScore(score);
+                try {
+                    Finisher.finish();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
             }
-            new Score(score, user);
-            System.out.println("111111");
+            if (isFirstTime) {
+                new Score(score, user);
+                isFirstTime = false;
+            }
         }
 
         if (isNewHighScore) {

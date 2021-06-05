@@ -50,8 +50,10 @@ public class GamePlayView implements Screen {
 
     Texture stop;
     Texture play;
+    Texture sadGhost;
+    boolean isHyperMode = false;
 
-    int[][] map = {{1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
+    int[][] map1 = {{1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
             {0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
             {0, 1, 1, 0, 1, 0, 1, 1, 0, 0},
             {0, 0, 0, 0, 1, 0, 0, 0, 0, 0},
@@ -61,7 +63,17 @@ public class GamePlayView implements Screen {
             {1, 1, 1, 1, 1, 1, 1, 1, 1, 1}};
 
 
-    public GamePlayView(Pashmak pashmak ,User currentLoggedInUser) {
+    int[][] map = {{1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
+            {0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+            {0, 1, 1, 0, 1, 0, 1, 1, 0, 0},
+            {0, 0, 1, 0, 1, 0, 0, 0, 0, 1},
+            {0, 0, 0, 0, 1, 0, 1, 0, 0, 0},
+            {1, 1, 1, 0, 1, 0, 1, 1, 0, 0},
+            {0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+            {1, 1, 1, 1, 1, 1, 1, 1, 1, 1}};
+
+
+    public GamePlayView(Pashmak pashmak, User currentLoggedInUser) {
         this.currentLoggedInUser = currentLoggedInUser;
         text = new BitmapFont(Gdx.files.internal("times.fnt"));
         pacman = new Rectangle();
@@ -104,6 +116,7 @@ public class GamePlayView implements Screen {
         ghost4Image = new Texture("ghost4.png");
         stop = new Texture("stop.png");
         play = new Texture("play.png");
+        sadGhost = new Texture("sadghost.png");
     }
 
 
@@ -119,56 +132,29 @@ public class GamePlayView implements Screen {
         switch (state) {
             case RUN:
 
-                initial();
-                printMap();
-                printGhosts();
-                ghostsDirection();
-                ghost1Move();
-                ghost2Move();
-                ghost3Move();
-                ghost4Move();
-                int pacmanDirection = 0;
-                pacmanDirection = wallBlock(pacmanDirection);
-                pacmanMove(pacmanDirection);
-                setEdges();
-                increaseScore();
-                if (Gdx.input.justTouched()) {
-                    if (Gdx.input.getX() > 720 && Gdx.input.getX() < 720 + stop.getWidth()
-                            && Gdx.input.getY() < 70 && Gdx.input.getY() > 70 - stop.getHeight()) {
-                        setState(State.PAUSE);
-                    }
-                }
-                if (pacman.overlaps(ghost1) || pacman.overlaps(ghost2) || pacman.overlaps(ghost3) || pacman.overlaps(ghost4)) {
-                    setState(State.PAUSE);
-                    ghost1.setPosition(10, 180);
-                    ghost2.setPosition(10, 570);
-                    ghost3.setPosition(730, 180);
-                    ghost4.setPosition(730, 570);
-                    health--;
-                }
-                if (health == 0) {
-                    game.setScreen(new GameEndView(game, score, currentLoggedInUser));
-                    dispose();
+                if (isHyperMode) {
+
+                } else {
+                    initial();
+                    printMap();
+                    printGhosts();
+                    ghostsDirection();
+                    ghost1Move();
+                    ghost2Move();
+                    ghost3Move();
+                    ghost4Move();
+                    int pacmanDirection = 0;
+                    pacmanDirection = wallBlock(pacmanDirection);
+                    pacmanMove(pacmanDirection);
+                    setEdges();
+                    increaseScore();
+                    checkForPause();
+                    checkForEndAndHurt();
                 }
                 break;
 
             case PAUSE:
-                batch.begin();
-                batch.draw(play, 300, 350, play.getWidth(), play.getHeight());
-                batch.end();
-                if (Gdx.input.justTouched()) {
-                    if (Gdx.input.getX() > 300 && Gdx.input.getX() < 300 + play.getWidth()
-                            && Gdx.input.getY() < 450 && Gdx.input.getY() > 450 - play.getHeight()) {
-                        setState(State.RUN);
-                    }
-                }
-//                if (Gdx.input.isKeyPressed(Input.Keys.LEFT) || Gdx.input.isKeyPressed(Input.Keys.RIGHT)
-//                        || Gdx.input.isKeyPressed(Input.Keys.UP) || Gdx.input.isKeyPressed(Input.Keys.DOWN)) {
-//                    if (Gdx.input.isKeyPressed(Input.Keys.LEFT) || Gdx.input.isKeyPressed(Input.Keys.RIGHT)
-//                            || Gdx.input.isKeyPressed(Input.Keys.UP) || Gdx.input.isKeyPressed(Input.Keys.DOWN)) {
-//                        setState(State.RUN);
-//                    }
-//                }
+                pauseHandle();
                 break;
             case RESUME:
 
@@ -178,6 +164,42 @@ public class GamePlayView implements Screen {
                 break;
         }
 
+    }
+
+    private void checkForPause() {
+        if (Gdx.input.justTouched()) {
+            if (Gdx.input.getX() > 720 && Gdx.input.getX() < 720 + stop.getWidth()
+                    && Gdx.input.getY() < 70 && Gdx.input.getY() > 70 - stop.getHeight()) {
+                setState(State.PAUSE);
+            }
+        }
+    }
+
+    private void checkForEndAndHurt() {
+        if (pacman.overlaps(ghost1) || pacman.overlaps(ghost2) || pacman.overlaps(ghost3) || pacman.overlaps(ghost4)) {
+            setState(State.PAUSE);
+            ghost1.setPosition(10, 180);
+            ghost2.setPosition(10, 570);
+            ghost3.setPosition(730, 180);
+            ghost4.setPosition(730, 570);
+            health--;
+        }
+        if (health == 0) {
+            game.setScreen(new GameEndView(game, score, currentLoggedInUser));
+            dispose();
+        }
+    }
+
+    private void pauseHandle() {
+        batch.begin();
+        batch.draw(play, 300, 350, play.getWidth(), play.getHeight());
+        batch.end();
+        if (Gdx.input.justTouched()) {
+            if (Gdx.input.getX() > 300 && Gdx.input.getX() < 300 + play.getWidth()
+                    && Gdx.input.getY() < 450 && Gdx.input.getY() > 450 - play.getHeight()) {
+                setState(State.RUN);
+            }
+        }
     }
 
     private void initial() {
