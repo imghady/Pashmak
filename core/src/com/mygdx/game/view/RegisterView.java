@@ -3,6 +3,7 @@ package com.mygdx.game.view;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.Screen;
+import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
@@ -29,8 +30,13 @@ public class RegisterView implements Screen, Input.TextInputListener {
     Texture register;
     int message = 0;
     boolean isFirstTime = true;
+    boolean isMute;
+    Texture mute;
+    Texture unmute;
+    Music music;
 
-    public RegisterView(Pashmak game) {
+    public RegisterView(Pashmak game, boolean isMute) {
+        this.isMute = isMute;
         this.game = game;
         text = new BitmapFont(Gdx.files.internal("times.fnt"));
         batch = new SpriteBatch();
@@ -39,6 +45,9 @@ public class RegisterView implements Screen, Input.TextInputListener {
         backButton = new Texture("back.png");
         registerButtons = new Texture("registerButtons.png");
         register = new Texture("register.png");
+        mute = new Texture("mute.png");
+        unmute = new Texture("unmute.png");
+        music = Gdx.audio.newMusic(Gdx.files.internal("music.mp3"));
     }
 
 
@@ -73,6 +82,18 @@ public class RegisterView implements Screen, Input.TextInputListener {
         text.draw(batch, username + "\n\n" + password, 350, 525);
         batch.end();
 
+        if (isMute) {
+            batch.begin();
+            batch.draw(mute, 10, 730, mute.getWidth(), mute.getHeight());
+            music.pause();
+            batch.end();
+        } else {
+            batch.begin();
+            batch.draw(unmute, 10, 730, unmute.getWidth(), unmute.getHeight());
+            music.play();
+            batch.end();
+        }
+
 
         if (message == 1) {
             batch.begin();
@@ -102,6 +123,7 @@ public class RegisterView implements Screen, Input.TextInputListener {
         if (Gdx.input.isTouched()) {
             if (Gdx.input.getY() > 790 - backButton.getHeight() && Gdx.input.getY() < 790) {
                 if (Gdx.input.getX() > 10 && Gdx.input.getX() < 10 + backButton.getWidth()) {
+                    music.pause();
                     game.setScreen(new WelcomeMenuView(game));
                     dispose();
                 }
@@ -132,6 +154,12 @@ public class RegisterView implements Screen, Input.TextInputListener {
                         }
                     }
                 }
+
+                if (Gdx.input.getX() > 10 && Gdx.input.getX() < 10 + mute.getWidth()
+                        && Gdx.input.getY() < 70 && Gdx.input.getY() > 70 - mute.getHeight()) {
+                    isMute = !isMute;
+                }
+
             }
 
 

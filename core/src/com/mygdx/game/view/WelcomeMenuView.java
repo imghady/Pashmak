@@ -93,10 +93,12 @@ public class WelcomeMenuView extends Game implements Screen {
         if (Gdx.input.isTouched()) {
             if (Gdx.input.getY() > 600 && Gdx.input.getY() < 650) {
                 if (Gdx.input.getX() > 200 && Gdx.input.getX() < 400) {
-                    game.setScreen(new LoginView(game));
+                    music.pause();
+                    game.setScreen(new LoginView(game, isMute));
                     dispose();
                 } else if (Gdx.input.getX() > 400 && Gdx.input.getX() < 600) {
-                    game.setScreen(new RegisterView(game));
+                    music.pause();
+                    game.setScreen(new RegisterView(game, isMute));
                     dispose();
                 }
 
@@ -105,17 +107,14 @@ public class WelcomeMenuView extends Game implements Screen {
             if (Gdx.input.justTouched()) {
                 if (Gdx.input.getX() > 10 && Gdx.input.getX() < 10 + mute.getWidth()
                         && Gdx.input.getY() < 70 && Gdx.input.getY() > 70 - mute.getHeight()) {
-                    if (isMute) {
-                        isMute = false;
-                    } else {
-                        isMute = true;
-                    }
+                    isMute = !isMute;
                 }
             }
 
             if (Gdx.input.getX() > 300 && Gdx.input.getX() < 300 + play.getWidth()
                     && Gdx.input.getY() < 450 && Gdx.input.getY() > 450 - play.getHeight()) {
-                game.setScreen(new GamePlayView(game, null));
+                music.pause();
+                game.setScreen(new GamePlayView(game, null, isMute));
                 dispose();
             }
 

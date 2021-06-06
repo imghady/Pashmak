@@ -7,6 +7,8 @@ import java.lang.Math;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.Screen;
+import com.badlogic.gdx.audio.Music;
+import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
@@ -48,7 +50,16 @@ public class GamePlayView implements Screen {
     int side2 = 2;
     int side3 = 3;
     int side4 = 0;
-
+    Sound bananaEat;
+    Sound pineappleEat;
+    Music scream;
+    boolean isMute;
+    Texture mute;
+    Texture unmute;
+    Music music;
+    Music fail;
+    Music khastenabash;
+    Music nani;
     Texture stop;
     Texture play;
     Texture sadGhost;
@@ -82,21 +93,22 @@ public class GamePlayView implements Screen {
             {1, 1, 1, 1, 1, 1, 1, 1, 1, 1}};
 
     int[][] map = {{1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
-            {0, 0, 7, 0, 0, 0, 0, 0, 7, 0},
+            {0, 0, 7, 0, 0, 0, 0, 0, 0, 0},
             {0, 1, 1, 0, 1, 0, 1, 1, 0, 0},
             {0, 1, 1, 0, 1, 0, 0, 0, 0, 1},
             {0, 0, 0, 0, 0, 0, 1, 0, 0, 0},
             {1, 0, 1, 0, 1, 0, 1, 1, 0, 0},
-            {0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+            {0, 0, 0, 0, 0, 0, 0, 7, 0, 0},
             {1, 1, 1, 1, 1, 1, 1, 1, 1, 1}};
 
 
-    public GamePlayView(Pashmak pashmak, User currentLoggedInUser) {
+    public GamePlayView(Pashmak pashmak, User currentLoggedInUser, boolean isMute) {
         this.currentLoggedInUser = currentLoggedInUser;
+        this.isMute = isMute;
         text = new BitmapFont(Gdx.files.internal("times.fnt"));
         pacman = new Rectangle();
         pacman.x = 400 - 32 + 40;
-        pacman.y = 400 - 32;
+        pacman.y = 400 - 10;
         pacman.width = 64;
         pacman.height = 64;
         ghost1 = new Rectangle();
@@ -125,9 +137,9 @@ public class GamePlayView implements Screen {
         pacmanImage = new Texture("droplet.png");
         game = pashmak;
         brick = new Texture("brick.png");
-        bricks = new Array<Rectangle>();
-        bananas = new Array<Rectangle>();
-        pineapples = new Array<Rectangle>();
+        bricks = new Array<>();
+        bananas = new Array<>();
+        pineapples = new Array<>();
         banana = new Texture("banana.png");
         ghost1Image = new Texture("ghost1.png");
         ghost2Image = new Texture("ghost2.png");
@@ -137,6 +149,16 @@ public class GamePlayView implements Screen {
         play = new Texture("play.png");
         sadGhost = new Texture("sadghost.png");
         pineapple = new Texture("pineapple.png");
+        mute = new Texture("mute.png");
+        unmute = new Texture("unmute.png");
+        music = Gdx.audio.newMusic(Gdx.files.internal("music.mp3"));
+        fail = Gdx.audio.newMusic(Gdx.files.internal("failed.mp3"));
+        khastenabash = Gdx.audio.newMusic(Gdx.files.internal("khastenabashi.mp3"));
+        nani = Gdx.audio.newMusic(Gdx.files.internal("nani.mp3"));
+        bananaEat = Gdx.audio.newSound(Gdx.files.internal("bananaeat.wav"));
+        pineappleEat = Gdx.audio.newSound(Gdx.files.internal("pineappleeat.wav"));
+        scream = Gdx.audio.newMusic(Gdx.files.internal("scream.mp3"));
+
     }
 
 
@@ -155,6 +177,7 @@ public class GamePlayView implements Screen {
                 if (isHyperMode) {
 
                     initial();
+                    handleMusic();
                     printMap();
                     printGhostsHyperMode();
                     ghostsDirection();
@@ -174,6 +197,7 @@ public class GamePlayView implements Screen {
                 } else {
 
                     initial();
+                    handleMusic();
                     printMap();
                     printGhosts();
                     ghostsDirection();
@@ -204,6 +228,27 @@ public class GamePlayView implements Screen {
 
     }
 
+    private void handleMusic() {
+        if (isMute) {
+            batch.begin();
+            batch.draw(mute, 10, 730, mute.getWidth(), mute.getHeight());
+            music.pause();
+            batch.end();
+        } else {
+            batch.begin();
+            batch.draw(unmute, 10, 730, unmute.getWidth(), unmute.getHeight());
+            music.play();
+            batch.end();
+        }
+
+        if (Gdx.input.justTouched()) {
+            if (Gdx.input.getX() > 10 && Gdx.input.getX() < 10 + mute.getWidth()
+                    && Gdx.input.getY() < 70 && Gdx.input.getY() > 70 - mute.getHeight()) {
+                isMute = !isMute;
+            }
+        }
+    }
+
     private void checkForPause() {
         if (Gdx.input.justTouched()) {
             if (Gdx.input.getX() > 720 && Gdx.input.getX() < 720 + stop.getWidth()
@@ -221,11 +266,15 @@ public class GamePlayView implements Screen {
             ghost3.setPosition(730, 180);
             ghost4.setPosition(730, 570);
             pacman.x = 400 - 32 + 40;
-            pacman.y = 400 - 32;
+            pacman.y = 400 - 10;
             health--;
+            if (!isMute && health > 0) {
+                nani.play();
+            }
         }
         if (health == 0) {
-            game.setScreen(new GameEndView(game, score, currentLoggedInUser));
+            music.pause();
+            game.setScreen(new GameEndView(game, score, currentLoggedInUser, isMute));
             dispose();
         }
     }
@@ -233,13 +282,16 @@ public class GamePlayView implements Screen {
     private void checkForKillGhost() {
         if (pacman.overlaps(ghost1) || pacman.overlaps(ghost2) || pacman.overlaps(ghost3) || pacman.overlaps(ghost4)) {
             score += 200 * ghostKillNumber;
+            if (!isMute) {
+                scream.play();
+            }
             setState(State.PAUSE);
             ghost1.setPosition(10, 180);
             ghost2.setPosition(11, 570);
             ghost3.setPosition(730, 180);
             ghost4.setPosition(730, 570);
             pacman.x = 400 - 32 + 40;
-            pacman.y = 400 - 32;
+            pacman.y = 400 - 10;
             ghostKillNumber++;
         }
     }
@@ -270,7 +322,7 @@ public class GamePlayView implements Screen {
         batch.draw(pacmanImage, pacman.x, pacman.y, 64, 64);
         batch.end();
         batch.begin();
-        text.draw(batch, "score : " + score + "\nhealth : " + health, 20, 790);
+        text.draw(batch, "score : " + score + "\nhealth : " + health, 100, 790);
         batch.end();
 
         batch.begin();
@@ -482,6 +534,9 @@ public class GamePlayView implements Screen {
                 if (map[row][column] == 0) {
                     map[row][column] = 2;
                     score += 5;
+                    if (!isMute) {
+                        bananaEat.play();
+                    }
                 }
             }
         }
@@ -497,6 +552,9 @@ public class GamePlayView implements Screen {
                 if (map[row][column] == 7) {
                     map[row][column] = 2;
                     isHyperMode = true;
+                    if (!isMute) {
+                        pineappleEat.play();
+                    }
                 }
             }
         }

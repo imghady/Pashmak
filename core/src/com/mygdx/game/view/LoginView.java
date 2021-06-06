@@ -4,6 +4,7 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.assets.loaders.AssetLoader;
+import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
@@ -32,8 +33,13 @@ public class LoginView implements Screen, Input.TextInputListener {
     boolean isHolderPassword = false;
     Texture login;
     int message = 0;
+    boolean isMute;
+    Texture mute;
+    Texture unmute;
+    Music music;
 
-    public LoginView(Pashmak game) {
+    public LoginView(Pashmak game, boolean isMute) {
+        this.isMute = isMute;
         this.game = game;
         text = new BitmapFont(Gdx.files.internal("times.fnt"));
         batch = new SpriteBatch();
@@ -42,6 +48,9 @@ public class LoginView implements Screen, Input.TextInputListener {
         backButton = new Texture("back.png");
         registerButtons = new Texture("registerButtons.png");
         login = new Texture("login.png");
+        mute = new Texture("mute.png");
+        unmute = new Texture("unmute.png");
+        music = Gdx.audio.newMusic(Gdx.files.internal("music.mp3"));
     }
 
 
@@ -74,6 +83,25 @@ public class LoginView implements Screen, Input.TextInputListener {
         text.draw(batch, username + "\n\n" + password, 350, 525);
         batch.end();
 
+        if (isMute) {
+            batch.begin();
+            batch.draw(mute, 10, 730, mute.getWidth(), mute.getHeight());
+            music.pause();
+            batch.end();
+        } else {
+            batch.begin();
+            batch.draw(unmute, 10, 730, unmute.getWidth(), unmute.getHeight());
+            music.play();
+            batch.end();
+        }
+
+        if (Gdx.input.justTouched()) {
+            if (Gdx.input.getX() > 10 && Gdx.input.getX() < 10 + mute.getWidth()
+                    && Gdx.input.getY() < 70 && Gdx.input.getY() > 70 - mute.getHeight()) {
+                isMute = !isMute;
+            }
+        }
+
         if (message == 1) {
             batch.begin();
             text.draw(batch, "please complete fields.", 200, 380);
@@ -98,6 +126,7 @@ public class LoginView implements Screen, Input.TextInputListener {
         if (Gdx.input.isTouched()) {
             if (Gdx.input.getY() > 790 - backButton.getHeight() && Gdx.input.getY() < 790) {
                 if (Gdx.input.getX() > 10 && Gdx.input.getX() < 10 + backButton.getWidth()) {
+                    music.pause();
                     game.setScreen(new WelcomeMenuView(game));
                     dispose();
                 }
@@ -123,7 +152,8 @@ public class LoginView implements Screen, Input.TextInputListener {
                             } else {
                                 if (User.isPasswordCorrect(username, password)) {
                                     message = 3;
-                                    game.setScreen(new MainMenuView(game, User.getUserByUsername(username)));
+                                    music.pause();
+                                    game.setScreen(new MainMenuView(game, User.getUserByUsername(username), isMute));
                                     dispose();
                                 } else {
                                     message = 4;

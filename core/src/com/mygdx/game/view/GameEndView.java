@@ -2,6 +2,7 @@ package com.mygdx.game.view;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
+import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
@@ -25,8 +26,16 @@ public class GameEndView implements Screen {
     User user;
     boolean isNewHighScore = false;
     boolean isFirstTime = true;
+    boolean isMute;
+    Texture mute;
+    Texture unmute;
+    Music music;
+    Music fail;
+    Music khastenabash;
+    boolean isFirstTimeForEffect = true;
 
-    public GameEndView(Pashmak game, int score, User user) {
+    public GameEndView(Pashmak game, int score, User user, boolean isMute) {
+        this.isMute = isMute;
         this.user = user;
         this.score = score;
         this.game = game;
@@ -36,6 +45,11 @@ public class GameEndView implements Screen {
         camera = new OrthographicCamera();
         camera.setToOrtho(false, 800, 800);
         backButton = new Texture("back.png");
+        mute = new Texture("mute.png");
+        unmute = new Texture("unmute.png");
+        music = Gdx.audio.newMusic(Gdx.files.internal("music.mp3"));
+        fail = Gdx.audio.newMusic(Gdx.files.internal("failed.mp3"));
+        khastenabash = Gdx.audio.newMusic(Gdx.files.internal("khastenabashi.mp3"));
     }
 
 
@@ -56,8 +70,30 @@ public class GameEndView implements Screen {
         text.draw(batch, "you die :(\nyour score : " + score, 300, 500);
         batch.end();
 
-        if (user == null) {
+        if (isMute) {
+            batch.begin();
+            batch.draw(mute, 10, 730, mute.getWidth(), mute.getHeight());
+            music.pause();
+            batch.end();
+        } else {
+            batch.begin();
+            batch.draw(unmute, 10, 730, unmute.getWidth(), unmute.getHeight());
+            music.play();
+            batch.end();
+        }
 
+        if (Gdx.input.justTouched()) {
+            if (Gdx.input.getX() > 10 && Gdx.input.getX() < 10 + mute.getWidth()
+                    && Gdx.input.getY() < 70 && Gdx.input.getY() > 70 - mute.getHeight()) {
+                isMute = !isMute;
+            }
+        }
+
+        if (user == null) {
+            if (isFirstTimeForEffect && !isMute) {
+                fail.play();
+                isFirstTimeForEffect = false;
+            }
         } else {
             if (user.isNewHighScore(score)) {
                 isNewHighScore = true;
@@ -80,19 +116,30 @@ public class GameEndView implements Screen {
         }
 
         if (isNewHighScore) {
+            if (isFirstTimeForEffect && !isMute) {
+                khastenabash.play();
+                isFirstTimeForEffect = false;
+            }
             batch.begin();
             text.setColor(Color.GREEN);
             text.draw(batch, "you have new high score!", 300, 400);
             batch.end();
+        } else {
+            if (isFirstTimeForEffect && !isMute) {
+                fail.play();
+                isFirstTimeForEffect = false;
+            }
         }
 
         if (Gdx.input.isTouched()) {
             if (Gdx.input.getY() > 790 - backButton.getHeight() && Gdx.input.getY() < 790) {
                 if (Gdx.input.getX() > 10 && Gdx.input.getX() < 10 + backButton.getWidth()) {
                     if (user == null) {
+                        music.pause();
                         game.setScreen(new WelcomeMenuView(game));
                     } else {
-                        game.setScreen(new MainMenuView(game, user));
+                        music.pause();
+                        game.setScreen(new MainMenuView(game, user, isMute));
                     }
                     dispose();
                 }

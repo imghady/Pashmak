@@ -2,6 +2,7 @@ package com.mygdx.game.view;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
+import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
@@ -21,8 +22,13 @@ public class ScoreboardView implements Screen {
     BitmapFont text;
     Texture backButton;
     User user;
+    boolean isMute;
+    Texture mute;
+    Texture unmute;
+    Music music;
 
-    public ScoreboardView(Pashmak game, User user) {
+    public ScoreboardView(Pashmak game, User user, boolean isMute) {
+        this.isMute = isMute;
         this.user = user;
         this.game = game;
         text = new BitmapFont(Gdx.files.internal("times.fnt"));
@@ -30,6 +36,9 @@ public class ScoreboardView implements Screen {
         camera = new OrthographicCamera();
         camera.setToOrtho(false, 800, 800);
         backButton = new Texture("back.png");
+        mute = new Texture("mute.png");
+        unmute = new Texture("unmute.png");
+        music = Gdx.audio.newMusic(Gdx.files.internal("music.mp3"));
     }
 
     @Override
@@ -82,11 +91,12 @@ public class ScoreboardView implements Screen {
         if (Gdx.input.justTouched()) {
             if (Gdx.input.getY() > 790 - backButton.getHeight() && Gdx.input.getY() < 790) {
                 if (Gdx.input.getX() > 10 && Gdx.input.getX() < 10 + backButton.getWidth()) {
-                    game.setScreen(new MainMenuView(game, user));
+                    game.setScreen(new MainMenuView(game, user, isMute));
                     dispose();
                 }
             }
         }
+
     }
 
     @Override

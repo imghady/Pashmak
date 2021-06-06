@@ -19,7 +19,7 @@ public class MainMenuView implements Screen, Input.TextInputListener {
     BitmapFont text;
     Texture mute;
     Texture unmute;
-    boolean isMute = false;
+    boolean isMute;
     Texture play;
     Texture scoreboard;
     Music music;
@@ -31,7 +31,8 @@ public class MainMenuView implements Screen, Input.TextInputListener {
     Texture changePassword;
     Texture bin;
 
-    public MainMenuView(Pashmak game, User currentLoggedInUser) {
+    public MainMenuView(Pashmak game, User currentLoggedInUser, boolean isMute) {
+        this.isMute = isMute;
         this.currentLoggedInUser = currentLoggedInUser;
         this.game = game;
         text = new BitmapFont(Gdx.files.internal("times.fnt"));
@@ -102,19 +103,22 @@ public class MainMenuView implements Screen, Input.TextInputListener {
 
             if (Gdx.input.getX() > 300 && Gdx.input.getX() < 300 + play.getWidth()
                     && Gdx.input.getY() < 450 && Gdx.input.getY() > 450 - play.getHeight()) {
-                game.setScreen(new GamePlayView(game, currentLoggedInUser));
+                music.pause();
+                game.setScreen(new GamePlayView(game, currentLoggedInUser, isMute));
                 dispose();
             }
 
             if (Gdx.input.getX() > 215 && Gdx.input.getX() < 215 + scoreboard.getWidth()
                     && Gdx.input.getY() < 570 && Gdx.input.getY() > 570 - scoreboard.getHeight()) {
-                game.setScreen(new ScoreboardView(game, currentLoggedInUser));
+                music.pause();
+                game.setScreen(new ScoreboardView(game, currentLoggedInUser, isMute));
                 dispose();
             }
 
             if (Gdx.input.getX() > 230 && Gdx.input.getX() < 230 + changePassword.getWidth()
                     && Gdx.input.getY() < 650 && Gdx.input.getY() > 650 - changePassword.getHeight()) {
-                game.setScreen(new changePasswordView(game, currentLoggedInUser));
+                music.pause();
+                game.setScreen(new changePasswordView(game, currentLoggedInUser, isMute));
                 dispose();
             }
 
@@ -123,6 +127,7 @@ public class MainMenuView implements Screen, Input.TextInputListener {
                 if (holder.equals(currentLoggedInUser.getPassword())) {
                     User.deleteUser(currentLoggedInUser);
                     User.allUsers.remove(currentLoggedInUser);
+                    music.pause();
                     game.setScreen(new WelcomeMenuView(game));
                     dispose();
                 } else {
@@ -132,6 +137,7 @@ public class MainMenuView implements Screen, Input.TextInputListener {
 
             if (Gdx.input.getX() > 0 && Gdx.input.getX() < logout.getWidth()
                     && Gdx.input.getY() < 800 && Gdx.input.getY() > 800 - logout.getHeight()) {
+                music.pause();
                 game.setScreen(new WelcomeMenuView(game));
                 dispose();
             }
