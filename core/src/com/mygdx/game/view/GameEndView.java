@@ -69,8 +69,13 @@ public class GameEndView implements Screen {
                 }
             }
             if (isFirstTime) {
-                new Score(score, user);
+                new Score(score, user.getUsername());
                 isFirstTime = false;
+                try {
+                    Finisher.writeScores();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
             }
         }
 

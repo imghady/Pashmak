@@ -43,6 +43,7 @@ public class GamePlayView implements Screen {
     Rectangle ghost4;
     private State state = State.RUN;
     long time = System.currentTimeMillis();
+    long hyperModeStartTime;
     int side1 = 1;
     int side2 = 2;
     int side3 = 3;
@@ -52,6 +53,14 @@ public class GamePlayView implements Screen {
     Texture play;
     Texture sadGhost;
     boolean isHyperMode = false;
+    Texture pineapple;
+    Array<Rectangle> pineapples;
+    int ghostKillNumber = 1;
+    int direction1 = 0;
+    int direction2 = 0;
+    int direction3 = 0;
+    int direction4 = 0;
+
 
     int[][] map1 = {{1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
             {0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
@@ -63,12 +72,21 @@ public class GamePlayView implements Screen {
             {1, 1, 1, 1, 1, 1, 1, 1, 1, 1}};
 
 
-    int[][] map = {{1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
-            {0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+    int[][] map2 = {{1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
+            {0, 0, 7, 0, 0, 0, 0, 0, 0, 0},
             {0, 1, 1, 0, 1, 0, 1, 1, 0, 0},
             {0, 0, 1, 0, 1, 0, 0, 0, 0, 1},
             {0, 0, 0, 0, 1, 0, 1, 0, 0, 0},
-            {1, 1, 1, 0, 1, 0, 1, 1, 0, 0},
+            {1, 1, 1, 0, 1, 0, 1, 1, 7, 0},
+            {0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+            {1, 1, 1, 1, 1, 1, 1, 1, 1, 1}};
+
+    int[][] map = {{1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
+            {0, 0, 7, 0, 0, 0, 0, 0, 7, 0},
+            {0, 1, 1, 0, 1, 0, 1, 1, 0, 0},
+            {0, 1, 1, 0, 1, 0, 0, 0, 0, 1},
+            {0, 0, 0, 0, 0, 0, 1, 0, 0, 0},
+            {1, 0, 1, 0, 1, 0, 1, 1, 0, 0},
             {0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
             {1, 1, 1, 1, 1, 1, 1, 1, 1, 1}};
 
@@ -77,8 +95,8 @@ public class GamePlayView implements Screen {
         this.currentLoggedInUser = currentLoggedInUser;
         text = new BitmapFont(Gdx.files.internal("times.fnt"));
         pacman = new Rectangle();
-        pacman.x = 800 / 2 - 64 / 2 + 40;
-        pacman.y = 800 / 2 - 64 / 2;
+        pacman.x = 400 - 32 + 40;
+        pacman.y = 400 - 32;
         pacman.width = 64;
         pacman.height = 64;
         ghost1 = new Rectangle();
@@ -109,6 +127,7 @@ public class GamePlayView implements Screen {
         brick = new Texture("brick.png");
         bricks = new Array<Rectangle>();
         bananas = new Array<Rectangle>();
+        pineapples = new Array<Rectangle>();
         banana = new Texture("banana.png");
         ghost1Image = new Texture("ghost1.png");
         ghost2Image = new Texture("ghost2.png");
@@ -117,6 +136,7 @@ public class GamePlayView implements Screen {
         stop = new Texture("stop.png");
         play = new Texture("play.png");
         sadGhost = new Texture("sadghost.png");
+        pineapple = new Texture("pineapple.png");
     }
 
 
@@ -134,7 +154,25 @@ public class GamePlayView implements Screen {
 
                 if (isHyperMode) {
 
+                    initial();
+                    printMap();
+                    printGhostsHyperMode();
+                    ghostsDirection();
+                    ghost1Move();
+                    ghost2Move();
+                    ghost3Move();
+                    ghost4Move();
+
+                    wallBlock();
+                    pacmanMove();
+                    setEdges();
+                    increaseScore();
+                    checkForPause();
+                    checkForKillGhost();
+                    checkForEndOfHyperMode();
+
                 } else {
+
                     initial();
                     printMap();
                     printGhosts();
@@ -143,13 +181,13 @@ public class GamePlayView implements Screen {
                     ghost2Move();
                     ghost3Move();
                     ghost4Move();
-                    int pacmanDirection = 0;
-                    pacmanDirection = wallBlock(pacmanDirection);
-                    pacmanMove(pacmanDirection);
+                    wallBlock();
+                    pacmanMove();
                     setEdges();
                     increaseScore();
                     checkForPause();
                     checkForEndAndHurt();
+
                 }
                 break;
 
@@ -182,11 +220,27 @@ public class GamePlayView implements Screen {
             ghost2.setPosition(10, 570);
             ghost3.setPosition(730, 180);
             ghost4.setPosition(730, 570);
+            pacman.x = 400 - 32 + 40;
+            pacman.y = 400 - 32;
             health--;
         }
         if (health == 0) {
             game.setScreen(new GameEndView(game, score, currentLoggedInUser));
             dispose();
+        }
+    }
+
+    private void checkForKillGhost() {
+        if (pacman.overlaps(ghost1) || pacman.overlaps(ghost2) || pacman.overlaps(ghost3) || pacman.overlaps(ghost4)) {
+            score += 200 * ghostKillNumber;
+            setState(State.PAUSE);
+            ghost1.setPosition(10, 180);
+            ghost2.setPosition(11, 570);
+            ghost3.setPosition(730, 180);
+            ghost4.setPosition(730, 570);
+            pacman.x = 400 - 32 + 40;
+            pacman.y = 400 - 32;
+            ghostKillNumber++;
         }
     }
 
@@ -213,7 +267,7 @@ public class GamePlayView implements Screen {
         batch.begin();
         pacman.width = 64;
         pacman.height = 64;
-        batch.draw(pacmanImage, pacman.x, pacman.y);
+        batch.draw(pacmanImage, pacman.x, pacman.y, 64, 64);
         batch.end();
         batch.begin();
         text.draw(batch, "score : " + score + "\nhealth : " + health, 20, 790);
@@ -236,117 +290,129 @@ public class GamePlayView implements Screen {
     }
 
     private void ghost4Move() {
-        int ghost4Direction = 0;
+        int ghost4Direction1 = 0;
+        int ghost4Direction2 = 0;
+        int ghost4Direction3 = 0;
+        int ghost4Direction4 = 0;
         for (Rectangle wall : bricks) {
             if (wall.overlaps(ghost4)) {
-                if (Math.abs(ghost4.x - wall.x) < 50) {
+                if (Math.abs(ghost4.x - wall.x) < 40) {
                     if (ghost4.y > wall.y) {
-                        ghost4Direction = 3;
+                        ghost4Direction3 = 3;
                     }
                     if (ghost4.y < wall.y) {
-                        ghost4Direction = 1;
+                        ghost4Direction1 = 1;
                     }
                 }
-                if (Math.abs(ghost4.y - wall.y) < 50) {
+                if (Math.abs(ghost4.y - wall.y) < 40) {
                     if (ghost4.x > wall.x) {
-                        ghost4Direction = 2;
+                        ghost4Direction2 = 2;
                     } else {
-                        ghost4Direction = 4;
+                        ghost4Direction4 = 4;
                     }
                 }
             }
         }
-        if (side4 == 0 && ghost4Direction != 2) ghost4.x -= 200 * Gdx.graphics.getDeltaTime();
-        if (side4 == 1 && ghost4Direction != 4) ghost4.x += 200 * Gdx.graphics.getDeltaTime();
-        if (side4 == 2 && ghost4Direction != 3) ghost4.y -= 200 * Gdx.graphics.getDeltaTime();
-        if (side4 == 3 && ghost4Direction != 1) ghost4.y += 200 * Gdx.graphics.getDeltaTime();
+        if (side4 == 0 && ghost4Direction2 != 2) ghost4.x -= 130 * Gdx.graphics.getDeltaTime();
+        if (side4 == 1 && ghost4Direction4 != 4) ghost4.x += 130 * Gdx.graphics.getDeltaTime();
+        if (side4 == 2 && ghost4Direction3 != 3) ghost4.y -= 130 * Gdx.graphics.getDeltaTime();
+        if (side4 == 3 && ghost4Direction1 != 1) ghost4.y += 130 * Gdx.graphics.getDeltaTime();
     }
 
     private void ghost3Move() {
-        int ghost3Direction = 0;
+        int ghost3Direction1 = 0;
+        int ghost3Direction2 = 0;
+        int ghost3Direction3 = 0;
+        int ghost3Direction4 = 0;
         for (Rectangle wall : bricks) {
             if (wall.overlaps(ghost3)) {
-                if (Math.abs(ghost3.x - wall.x) < 50) {
+                if (Math.abs(ghost3.x - wall.x) < 41) {
                     if (ghost3.y > wall.y) {
-                        ghost3Direction = 3;
+                        ghost3Direction3 = 3;
 
                     }
                     if (ghost3.y < wall.y) {
-                        ghost3Direction = 1;
+                        ghost3Direction1 = 1;
                     }
                 }
-                if (Math.abs(ghost3.y - wall.y) < 50) {
+                if (Math.abs(ghost3.y - wall.y) < 40) {
                     if (ghost3.x > wall.x) {
-                        ghost3Direction = 2;
+                        ghost3Direction2 = 2;
 
                     } else {
-                        ghost3Direction = 4;
+                        ghost3Direction4 = 4;
                     }
                 }
             }
         }
-        if (side3 == 0 && ghost3Direction != 2) ghost3.x -= 200 * Gdx.graphics.getDeltaTime();
-        if (side3 == 1 && ghost3Direction != 4) ghost3.x += 200 * Gdx.graphics.getDeltaTime();
-        if (side3 == 2 && ghost3Direction != 3) ghost3.y -= 200 * Gdx.graphics.getDeltaTime();
-        if (side3 == 3 && ghost3Direction != 1) ghost3.y += 200 * Gdx.graphics.getDeltaTime();
+        if (side3 == 0 && ghost3Direction2 != 2) ghost3.x -= 130 * Gdx.graphics.getDeltaTime();
+        if (side3 == 1 && ghost3Direction4 != 4) ghost3.x += 130 * Gdx.graphics.getDeltaTime();
+        if (side3 == 2 && ghost3Direction3 != 3) ghost3.y -= 130 * Gdx.graphics.getDeltaTime();
+        if (side3 == 3 && ghost3Direction1 != 1) ghost3.y += 130 * Gdx.graphics.getDeltaTime();
     }
 
     private void ghost2Move() {
-        int ghost2Direction = 0;
+        int ghost2Direction1 = 0;
+        int ghost2Direction2 = 0;
+        int ghost2Direction3 = 0;
+        int ghost2Direction4 = 0;
         for (Rectangle wall : bricks) {
             if (wall.overlaps(ghost2)) {
-                if (Math.abs(ghost2.x - wall.x) < 50) {
+                if (Math.abs(ghost2.x - wall.x) < 40) {
                     if (ghost2.y > wall.y) {
-                        ghost2Direction = 3;
+                        ghost2Direction3 = 3;
 
                     }
                     if (ghost2.y < wall.y) {
-                        ghost2Direction = 1;
+                        ghost2Direction1 = 1;
                     }
                 }
-                if (Math.abs(ghost2.y - wall.y) < 50) {
+                if (Math.abs(ghost2.y - wall.y) < 41) {
                     if (ghost2.x > wall.x) {
-                        ghost2Direction = 2;
+                        ghost2Direction2= 2;
 
                     } else {
-                        ghost2Direction = 4;
+                        ghost2Direction4 = 4;
                     }
                 }
             }
         }
-        if (side2 == 0 && ghost2Direction != 2) ghost2.x -= 200 * Gdx.graphics.getDeltaTime();
-        if (side2 == 1 && ghost2Direction != 4) ghost2.x += 200 * Gdx.graphics.getDeltaTime();
-        if (side2 == 2 && ghost2Direction != 3) ghost2.y -= 200 * Gdx.graphics.getDeltaTime();
-        if (side2 == 3 && ghost2Direction != 1) ghost2.y += 200 * Gdx.graphics.getDeltaTime();
+        if (side2 == 0 && ghost2Direction2 != 2) ghost2.x -= 130 * Gdx.graphics.getDeltaTime();
+        if (side2 == 1 && ghost2Direction4 != 4) ghost2.x += 130 * Gdx.graphics.getDeltaTime();
+        if (side2 == 2 && ghost2Direction3 != 3) ghost2.y -= 130 * Gdx.graphics.getDeltaTime();
+        if (side2 == 3 && ghost2Direction1 != 1) ghost2.y += 130 * Gdx.graphics.getDeltaTime();
     }
 
     private void ghost1Move() {
-        int ghost1Direction = 0;
+        int ghost1Direction1 = 0;
+        int ghost1Direction2= 0;
+        int ghost1Direction3 = 0;
+        int ghost1Direction4 = 0;
         for (Rectangle wall : bricks) {
             if (wall.overlaps(ghost1)) {
-                if (Math.abs(ghost1.x - wall.x) < 50) {
+                if (Math.abs(ghost1.x - wall.x) < 41) {
                     if (ghost1.y > wall.y) {
-                        ghost1Direction = 3;
+                        ghost1Direction3 = 3;
 
                     }
                     if (ghost1.y < wall.y) {
-                        ghost1Direction = 1;
+                        ghost1Direction1 = 1;
                     }
                 }
-                if (Math.abs(ghost1.y - wall.y) < 50) {
+                if (Math.abs(ghost1.y - wall.y) < 41) {
                     if (ghost1.x > wall.x) {
-                        ghost1Direction = 2;
+                        ghost1Direction2 = 2;
 
                     } else {
-                        ghost1Direction = 4;
+                        ghost1Direction4 = 4;
                     }
                 }
             }
         }
-        if (side1 == 0 && ghost1Direction != 2) ghost1.x -= 200 * Gdx.graphics.getDeltaTime();
-        if (side1 == 1 && ghost1Direction != 4) ghost1.x += 200 * Gdx.graphics.getDeltaTime();
-        if (side1 == 2 && ghost1Direction != 3) ghost1.y -= 200 * Gdx.graphics.getDeltaTime();
-        if (side1 == 3 && ghost1Direction != 1) ghost1.y += 200 * Gdx.graphics.getDeltaTime();
+        if (side1 == 0 && ghost1Direction2 != 2) ghost1.x -= 130 * Gdx.graphics.getDeltaTime();
+        if (side1 == 1 && ghost1Direction4 != 4) ghost1.x += 130 * Gdx.graphics.getDeltaTime();
+        if (side1 == 2 && ghost1Direction3 != 3) ghost1.y -= 130 * Gdx.graphics.getDeltaTime();
+        if (side1 == 3 && ghost1Direction1 != 1) ghost1.y += 130 * Gdx.graphics.getDeltaTime();
     }
 
     private void printGhosts() {
@@ -361,6 +427,21 @@ public class GamePlayView implements Screen {
         batch.end();
         batch.begin();
         batch.draw(ghost4Image, ghost4.x, ghost4.y);
+        batch.end();
+    }
+
+    private void printGhostsHyperMode() {
+        batch.begin();
+        batch.draw(sadGhost, ghost1.x, ghost1.y);
+        batch.end();
+        batch.begin();
+        batch.draw(sadGhost, ghost2.x, ghost2.y);
+        batch.end();
+        batch.begin();
+        batch.draw(sadGhost, ghost3.x, ghost3.y);
+        batch.end();
+        batch.begin();
+        batch.draw(sadGhost, ghost4.x, ghost4.y);
         batch.end();
     }
 
@@ -404,44 +485,62 @@ public class GamePlayView implements Screen {
                 }
             }
         }
+
+        for (Rectangle pineapple1 : pineapples) {
+            if (pineapple1.overlaps(pacman)) {
+                ghostKillNumber = 1;
+                hyperModeStartTime = System.currentTimeMillis();
+                float banana1X = pineapple1.x;
+                float banana1Y = pineapple1.y;
+                int row = (int) ((banana1Y - 50) / 80);
+                int column = (int) ((banana1X + 15) / 80);
+                if (map[row][column] == 7) {
+                    map[row][column] = 2;
+                    isHyperMode = true;
+                }
+            }
+        }
     }
 
-    private int wallBlock(int direction) {
+    private void wallBlock() {
+        direction1 = 0;
+        direction2 = 0;
+        direction3 = 0;
+        direction4 = 0;
         for (Rectangle wall : bricks) {
             if (wall.overlaps(pacman)) {
                 if (Math.abs(pacman.x - wall.x) < 40) {
                     if (pacman.y > wall.y) {
-                        direction = 3;
+                        direction3 = 3;
 
                     }
                     if (pacman.y < wall.y) {
-                        direction = 1;
+                        direction1 = 1;
                     }
                 }
                 if (Math.abs(pacman.y - wall.y) < 40) {
                     if (pacman.x > wall.x) {
-                        direction = 2;
+                        direction2 = 2;
 
                     } else {
-                        direction = 4;
+                        direction4 = 4;
                     }
                 }
             }
         }
-        return direction;
     }
 
-    private void pacmanMove(int direction) {
-        if (Gdx.input.isKeyPressed(Input.Keys.LEFT) && direction != 2) {
+    private void pacmanMove() {
+        if (Gdx.input.isKeyPressed(Input.Keys.LEFT) && direction2 != 2) {
             pacman.x -= 200 * Gdx.graphics.getDeltaTime();
         }
-        if (Gdx.input.isKeyPressed(Input.Keys.RIGHT) && direction != 4) {
+        if (Gdx.input.isKeyPressed(Input.Keys.RIGHT) && direction4 != 4) {
             pacman.x += 200 * Gdx.graphics.getDeltaTime();
         }
-        if (Gdx.input.isKeyPressed(Input.Keys.DOWN) && direction != 3) {
+        if (Gdx.input.isKeyPressed(Input.Keys.DOWN) && direction3 != 3) {
             pacman.y -= 200 * Gdx.graphics.getDeltaTime();
         }
-        if (Gdx.input.isKeyPressed(Input.Keys.UP) && direction != 1) {
+        if (Gdx.input.isKeyPressed(Input.Keys.UP) && direction1 != 1) {
             pacman.y += 200 * Gdx.graphics.getDeltaTime();
         }
     }
@@ -463,14 +562,30 @@ public class GamePlayView implements Screen {
                     batch.begin();
                     batch.draw(banana, column * 80 + 15, row * 80 + 100, 48, 48);
                     Rectangle aBanana = new Rectangle();
-                    aBanana.x = column * 80;
-                    aBanana.y = row * 80 + 80;
+                    aBanana.x = column * 80 + 25;
+                    aBanana.y = row * 80 + 110;
                     aBanana.height = 20;
                     aBanana.width = 20;
                     bananas.add(aBanana);
                     batch.end();
+                } else if (map[row][column] == 7) {
+                    batch.begin();
+                    batch.draw(pineapple, column * 80 + 15, row * 80 + 100, 48, 48);
+                    Rectangle aPineapple = new Rectangle();
+                    aPineapple.x = column * 80 + 25;
+                    aPineapple.y = row * 80 + 110;
+                    aPineapple.height = 20;
+                    aPineapple.width = 20;
+                    pineapples.add(aPineapple);
+                    batch.end();
                 }
             }
+        }
+    }
+
+    private void checkForEndOfHyperMode() {
+        if (System.currentTimeMillis() - hyperModeStartTime > 10000) {
+            isHyperMode = false;
         }
     }
 

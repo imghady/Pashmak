@@ -8,6 +8,7 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.mygdx.game.Pashmak;
+import com.mygdx.game.controller.SortScore;
 import com.mygdx.game.model.Score;
 import com.mygdx.game.model.User;
 
@@ -50,23 +51,28 @@ public class ScoreboardView implements Screen {
         batch.begin();
         text.draw(batch, "Scoreboard : ", 200, 700);
         ArrayList<Score> highScores = Score.allScores;
+        highScores.sort(new SortScore());
         Score.sortAllScores(highScores);
         if (highScores.size() > 10) {
-            int i = 1;
-            for (int counter = 0; counter < 10; counter++) {
-                text.draw(batch, i + "- " + highScores.get(counter).getOwner().getUsername() + " - score : " + highScores.get(counter).getScore(), 200, 650 - 50 * counter);
-                if (highScores.get(counter) != highScores.get(counter + 1)) {
+            int i = 1, j = 0;
+            for (int counter = highScores.size() - 1; counter >= highScores.size() - 10; counter--) {
+                text.draw(batch, i + "- " + highScores.get(counter).getOwner().getUsername() + " - score : " + highScores.get(counter).getScore(), 200, 650 - 50 * j);
+                if (highScores.get(counter).getScore() != highScores.get(counter - 1).getScore()) {
                     i++;
                 }
+                j++;
             }
         } else {
-            int i = 1;
-            for (int counter = 0; counter < highScores.size(); counter++) {
-                text.draw(batch, i + "- " + highScores.get(counter).getOwner().getUsername() + " - score : " + highScores.get(counter).getScore(), 200, 650 - 50 * counter);
-                if (counter + 1 < highScores.size()) {
-                    if (highScores.get(counter) != highScores.get(counter + 1)) {
-                        i++;
+            if (highScores.size() > 0) {
+                int i = 1, j = 0;
+                for (int counter = highScores.size() - 1; counter >= 0; counter--) {
+                    text.draw(batch, i + "- " + highScores.get(counter).getOwner().getUsername() + " - score : " + highScores.get(counter).getScore(), 200, 650 - 50 * j);
+                    if (counter - 1 >= 0) {
+                        if (highScores.get(counter).getScore() != highScores.get(counter - 1).getScore()) {
+                            i++;
+                        }
                     }
+                    j++;
                 }
             }
         }

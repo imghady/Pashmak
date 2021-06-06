@@ -8,13 +8,16 @@ import java.util.Collections;
 public class Score {
 
     private int score;
-    private User owner;
+    private String owner;
 
-    public static ArrayList<Score> allScores = new ArrayList<>();
+    public static ArrayList allScores = new ArrayList<>();
 
-    public Score (int score, User user) {
+    public Score (int score, String user) {
         this.owner = user;
         this.score = score;
+        if (allScores == null) {
+            allScores = new ArrayList<>();
+        }
         allScores.add(this);
     }
 
@@ -28,10 +31,10 @@ public class Score {
     }
 
     public User getOwner() {
-        return owner;
+        return User.getUserByUsername(owner);
     }
 
-    public void setOwner(User owner) {
+    public void setOwner(String owner) {
         this.owner = owner;
     }
 }
