@@ -62,10 +62,91 @@ public class MainMenuView implements Screen, Input.TextInputListener {
     public void render(float delta) {
         ScreenUtils.clear(0, 0, 0, 1);
 
-
         camera.update();
         game.batch.setProjectionMatrix(camera.combined);
 
+        prints();
+
+        deleteAcc();
+        batch.end();
+
+        printMute();
+
+        if (Gdx.input.justTouched()) {
+            checkClick1();
+            checkClick2();
+            checkClick3();
+        }
+
+    }
+
+    private void checkClick3() {
+        if (Gdx.input.getX() > 0 && Gdx.input.getX() < logout.getWidth()
+                && Gdx.input.getY() < 800 && Gdx.input.getY() > 800 - logout.getHeight()) {
+            music.pause();
+            game.setScreen(new WelcomeMenuView(game));
+            dispose();
+        }
+
+        if (Gdx.input.getX() > 500 && Gdx.input.getX() < 500 + deleteAccount.getWidth()
+                && Gdx.input.getY() < 800 && Gdx.input.getY() > 800 - deleteAccount.getHeight()) {
+            Gdx.input.getTextInput(this, "enter your password", "", "");
+            isPrintDeleteAccount = true;
+
+        }
+    }
+
+    private void checkClick2() {
+        if (Gdx.input.getX() > 230 && Gdx.input.getX() < 230 + changePassword.getWidth()
+                && Gdx.input.getY() < 650 && Gdx.input.getY() > 650 - changePassword.getHeight()) {
+            music.pause();
+            game.setScreen(new changePasswordView(game, currentLoggedInUser, isMute));
+            dispose();
+        }
+
+        if (Gdx.input.getX() > 700 && Gdx.input.getX() < 700 + bin.getWidth()
+                && Gdx.input.getY() < 750 && Gdx.input.getY() > 750 - bin.getHeight()) {
+            if (holder.equals(currentLoggedInUser.getPassword())) {
+                User.deleteUser(currentLoggedInUser);
+                User.allUsers.remove(currentLoggedInUser);
+                music.pause();
+                game.setScreen(new WelcomeMenuView(game));
+                dispose();
+            } else {
+                isPrintDeleteAccount = false;
+            }
+        }
+    }
+
+    private void checkClick1() {
+        if (Gdx.input.getX() > 10 && Gdx.input.getX() < 10 + mute.getWidth()
+                && Gdx.input.getY() < 70 && Gdx.input.getY() > 70 - mute.getHeight()) {
+            isMute = !isMute;
+        }
+
+        if (Gdx.input.getX() > 300 && Gdx.input.getX() < 300 + play.getWidth()
+                && Gdx.input.getY() < 450 && Gdx.input.getY() > 450 - play.getHeight()) {
+            music.pause();
+            game.setScreen(new StartGameView(game, currentLoggedInUser, isMute));
+            dispose();
+        }
+
+        if (Gdx.input.getX() > 215 && Gdx.input.getX() < 215 + scoreboard.getWidth()
+                && Gdx.input.getY() < 570 && Gdx.input.getY() > 570 - scoreboard.getHeight()) {
+            music.pause();
+            game.setScreen(new ScoreboardView(game, currentLoggedInUser, isMute));
+            dispose();
+        }
+    }
+
+    private void deleteAcc() {
+        if (isPrintDeleteAccount) {
+            text.draw(batch, "tap again to delete!", 430, 100);
+            batch.draw(bin, 700, 50, bin.getWidth(), bin.getHeight());
+        }
+    }
+
+    private void prints() {
         batch.begin();
         batch.draw(play, 300, 350, play.getWidth(), play.getHeight());
         batch.draw(scoreboard, 215, 230, (float) (scoreboard.getWidth() * 0.8), (float) (scoreboard.getHeight() * 0.8));
@@ -76,14 +157,9 @@ public class MainMenuView implements Screen, Input.TextInputListener {
 
         batch.begin();
         text.draw(batch, "main menu\nusername : " + currentLoggedInUser.getUsername() + "\nyour high score : " + currentLoggedInUser.getHighScore(), 200, 700);
+    }
 
-        if (isPrintDeleteAccount) {
-            text.draw(batch, "tap again to delete!", 430, 100);
-            batch.draw(bin, 700, 50, bin.getWidth(), bin.getHeight());
-        }
-        batch.end();
-
-
+    private void printMute() {
         if (isMute) {
             batch.begin();
             batch.draw(mute, 10, 730, mute.getWidth(), mute.getHeight());
@@ -95,62 +171,6 @@ public class MainMenuView implements Screen, Input.TextInputListener {
             music.play();
             batch.end();
         }
-
-        if (Gdx.input.justTouched()) {
-            if (Gdx.input.getX() > 10 && Gdx.input.getX() < 10 + mute.getWidth()
-                    && Gdx.input.getY() < 70 && Gdx.input.getY() > 70 - mute.getHeight()) {
-                isMute = !isMute;
-            }
-
-            if (Gdx.input.getX() > 300 && Gdx.input.getX() < 300 + play.getWidth()
-                    && Gdx.input.getY() < 450 && Gdx.input.getY() > 450 - play.getHeight()) {
-                music.pause();
-                game.setScreen(new StartGameView(game, currentLoggedInUser, isMute));
-                dispose();
-            }
-
-            if (Gdx.input.getX() > 215 && Gdx.input.getX() < 215 + scoreboard.getWidth()
-                    && Gdx.input.getY() < 570 && Gdx.input.getY() > 570 - scoreboard.getHeight()) {
-                music.pause();
-                game.setScreen(new ScoreboardView(game, currentLoggedInUser, isMute));
-                dispose();
-            }
-
-            if (Gdx.input.getX() > 230 && Gdx.input.getX() < 230 + changePassword.getWidth()
-                    && Gdx.input.getY() < 650 && Gdx.input.getY() > 650 - changePassword.getHeight()) {
-                music.pause();
-                game.setScreen(new changePasswordView(game, currentLoggedInUser, isMute));
-                dispose();
-            }
-
-            if (Gdx.input.getX() > 700 && Gdx.input.getX() < 700 + bin.getWidth()
-                    && Gdx.input.getY() < 750 && Gdx.input.getY() > 750 - bin.getHeight()) {
-                if (holder.equals(currentLoggedInUser.getPassword())) {
-                    User.deleteUser(currentLoggedInUser);
-                    User.allUsers.remove(currentLoggedInUser);
-                    music.pause();
-                    game.setScreen(new WelcomeMenuView(game));
-                    dispose();
-                } else {
-                    isPrintDeleteAccount = false;
-                }
-            }
-
-            if (Gdx.input.getX() > 0 && Gdx.input.getX() < logout.getWidth()
-                    && Gdx.input.getY() < 800 && Gdx.input.getY() > 800 - logout.getHeight()) {
-                music.pause();
-                game.setScreen(new WelcomeMenuView(game));
-                dispose();
-            }
-
-            if (Gdx.input.getX() > 500 && Gdx.input.getX() < 500 + deleteAccount.getWidth()
-                    && Gdx.input.getY() < 800 && Gdx.input.getY() > 800 - deleteAccount.getHeight()) {
-                Gdx.input.getTextInput(this, "enter your password", "", "");
-                isPrintDeleteAccount = true;
-
-            }
-        }
-
     }
 
     @Override

@@ -58,18 +58,60 @@ public class changePasswordView implements Screen, Input.TextInputListener {
     @Override
     public void render(float delta) {
 
-        ScreenUtils.clear(0, 0, 0, 1);
+        initial();
 
-        camera.update();
-        game.batch.setProjectionMatrix(camera.combined);
+        printMessage();
 
-        batch.begin();
-        batch.draw(backButton, 10, 10, backButton.getWidth(), backButton.getHeight());
-        batch.draw(changePassword, 230, 200, changePassword.getWidth(), changePassword.getHeight());
-        batch.draw(newPass, 270, 300, newPass.getWidth(), newPass.getHeight());
-        text.draw(batch, "tap to change your password", 230, 500);
+        printMute();
+        if (Gdx.input.justTouched()) {
+            checkforClick();
 
+            changePass();
 
+        }
+
+    }
+
+    private void checkforClick() {
+        if (Gdx.input.getY() > 790 - backButton.getHeight() && Gdx.input.getY() < 790) {
+            if (Gdx.input.getX() > 10 && Gdx.input.getX() < 10 + backButton.getWidth()) {
+                music.pause();
+                game.setScreen(new MainMenuView(game, currentLoggedInUser, isMute));
+                dispose();
+            }
+        }
+
+        if (Gdx.input.getX() > 270 && Gdx.input.getX() < 270 + newPass.getWidth()
+                && Gdx.input.getY() < 500 && Gdx.input.getY() > 500 - newPass.getHeight()) {
+            Gdx.input.getTextInput(this, "enter new password", "", "");
+        }
+
+        if (Gdx.input.getX() > 10 && Gdx.input.getX() < 10 + mute.getWidth()
+                && Gdx.input.getY() < 70 && Gdx.input.getY() > 70 - mute.getHeight()) {
+            isMute = !isMute;
+        }
+    }
+
+    private void changePass() {
+        if (Gdx.input.getX() > 230 && Gdx.input.getX() < 230 + changePassword.getWidth()
+                && Gdx.input.getY() < 600 && Gdx.input.getY() > 600 - changePassword.getHeight()) {
+            if (holder == null || holder.equals("")) {
+                isNull = true;
+                isChanged = false;
+            } else {
+                currentLoggedInUser.setPassword(holder);
+                try {
+                    Finisher.finish();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                isChanged = true;
+                isNull = false;
+            }
+        }
+    }
+
+    private void printMessage() {
         if (isChanged) {
             text.setColor(Color.GREEN);
             text.draw(batch, "your password changed successfully.", 230, 400);
@@ -79,7 +121,9 @@ public class changePasswordView implements Screen, Input.TextInputListener {
             text.draw(batch, "please enter a new password.", 230, 400);
         }
         batch.end();
+    }
 
+    private void printMute() {
         if (isMute) {
             batch.begin();
             batch.draw(mute, 10, 730, mute.getWidth(), mute.getHeight());
@@ -91,46 +135,19 @@ public class changePasswordView implements Screen, Input.TextInputListener {
             music.play();
             batch.end();
         }
+    }
 
-        if (Gdx.input.justTouched()) {
-            if (Gdx.input.getY() > 790 - backButton.getHeight() && Gdx.input.getY() < 790) {
-                if (Gdx.input.getX() > 10 && Gdx.input.getX() < 10 + backButton.getWidth()) {
-                    music.pause();
-                    game.setScreen(new MainMenuView(game, currentLoggedInUser, isMute));
-                    dispose();
-                }
-            }
+    private void initial() {
+        ScreenUtils.clear(0, 0, 0, 1);
 
-            if (Gdx.input.getX() > 270 && Gdx.input.getX() < 270 + newPass.getWidth()
-                    && Gdx.input.getY() < 500 && Gdx.input.getY() > 500 - newPass.getHeight()) {
-                Gdx.input.getTextInput(this, "enter new password", "", "");
-            }
+        camera.update();
+        game.batch.setProjectionMatrix(camera.combined);
 
-            if (Gdx.input.getX() > 230 && Gdx.input.getX() < 230 + changePassword.getWidth()
-                    && Gdx.input.getY() < 600 && Gdx.input.getY() > 600 - changePassword.getHeight()) {
-                if (holder == null || holder.equals("")) {
-                    isNull = true;
-                    isChanged = false;
-                } else {
-                    currentLoggedInUser.setPassword(holder);
-                    try {
-                        Finisher.finish();
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                    isChanged = true;
-                    isNull = false;
-                }
-            }
-
-
-            if (Gdx.input.getX() > 10 && Gdx.input.getX() < 10 + mute.getWidth()
-                    && Gdx.input.getY() < 70 && Gdx.input.getY() > 70 - mute.getHeight()) {
-                isMute = !isMute;
-            }
-
-        }
-
+        batch.begin();
+        batch.draw(backButton, 10, 10, backButton.getWidth(), backButton.getHeight());
+        batch.draw(changePassword, 230, 200, changePassword.getWidth(), changePassword.getHeight());
+        batch.draw(newPass, 270, 300, newPass.getWidth(), newPass.getHeight());
+        text.draw(batch, "tap to change your password", 230, 500);
     }
 
     @Override

@@ -63,6 +63,64 @@ public class WelcomeMenuView extends Game implements Screen {
         camera.update();
         game.batch.setProjectionMatrix(camera.combined);
 
+        prints();
+
+        printMute();
+
+        if (Gdx.input.isTouched()) {
+            mute();
+            checkClicks();
+
+        }
+
+    }
+
+    private void checkClicks() {
+        if (Gdx.input.justTouched()) {
+            if (Gdx.input.getX() > 10 && Gdx.input.getX() < 10 + mute.getWidth()
+                    && Gdx.input.getY() < 70 && Gdx.input.getY() > 70 - mute.getHeight()) {
+                isMute = !isMute;
+            }
+        }
+
+        if (Gdx.input.getX() > 300 && Gdx.input.getX() < 300 + play.getWidth()
+                && Gdx.input.getY() < 450 && Gdx.input.getY() > 450 - play.getHeight()) {
+            music.pause();
+            game.setScreen(new StartGameView(game, null, isMute));
+            dispose();
+        }
+    }
+
+    private void mute() {
+        if (Gdx.input.getY() > 600 && Gdx.input.getY() < 650) {
+            if (Gdx.input.getX() > 200 && Gdx.input.getX() < 400) {
+                music.pause();
+                game.setScreen(new LoginView(game, isMute));
+                dispose();
+            } else if (Gdx.input.getX() > 400 && Gdx.input.getX() < 600) {
+                music.pause();
+                game.setScreen(new RegisterView(game, isMute));
+                dispose();
+            }
+
+        }
+    }
+
+    private void printMute() {
+        if (isMute) {
+            batch.begin();
+            batch.draw(mute, 10, 730, mute.getWidth(), mute.getHeight());
+            music.pause();
+            batch.end();
+        } else {
+            batch.begin();
+            batch.draw(unmute, 10, 730, unmute.getWidth(), unmute.getHeight());
+            music.play();
+            batch.end();
+        }
+    }
+
+    private void prints() {
         batch.begin();
         text.draw(batch, "welcome to pashmak\nplease register or login to play", 200, 700);
         batch.end();
@@ -78,49 +136,6 @@ public class WelcomeMenuView extends Game implements Screen {
         batch.begin();
         batch.draw(play, 300, 350, play.getWidth(), play.getHeight());
         batch.end();
-
-        if (isMute) {
-            batch.begin();
-            batch.draw(mute, 10, 730, mute.getWidth(), mute.getHeight());
-            music.pause();
-            batch.end();
-        } else {
-            batch.begin();
-            batch.draw(unmute, 10, 730, unmute.getWidth(), unmute.getHeight());
-            music.play();
-            batch.end();
-        }
-
-        if (Gdx.input.isTouched()) {
-            if (Gdx.input.getY() > 600 && Gdx.input.getY() < 650) {
-                if (Gdx.input.getX() > 200 && Gdx.input.getX() < 400) {
-                    music.pause();
-                    game.setScreen(new LoginView(game, isMute));
-                    dispose();
-                } else if (Gdx.input.getX() > 400 && Gdx.input.getX() < 600) {
-                    music.pause();
-                    game.setScreen(new RegisterView(game, isMute));
-                    dispose();
-                }
-
-            }
-
-            if (Gdx.input.justTouched()) {
-                if (Gdx.input.getX() > 10 && Gdx.input.getX() < 10 + mute.getWidth()
-                        && Gdx.input.getY() < 70 && Gdx.input.getY() > 70 - mute.getHeight()) {
-                    isMute = !isMute;
-                }
-            }
-
-            if (Gdx.input.getX() > 300 && Gdx.input.getX() < 300 + play.getWidth()
-                    && Gdx.input.getY() < 450 && Gdx.input.getY() > 450 - play.getHeight()) {
-                music.pause();
-                game.setScreen(new StartGameView(game, null, isMute));
-                dispose();
-            }
-
-        }
-
     }
 
     @Override

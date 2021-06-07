@@ -66,6 +66,22 @@ public class LoginView implements Screen, Input.TextInputListener {
         camera.update();
         game.batch.setProjectionMatrix(camera.combined);
 
+        prints();
+        handleMute();
+        printMessage();
+
+        if (Gdx.input.isTouched()) {
+            back();
+
+            if (Gdx.input.justTouched()) {
+                register();
+
+                messageHandle();
+            }
+        }
+    }
+
+    private void prints() {
         batch.begin();
         batch.draw(backButton, 10, 10, backButton.getWidth(), backButton.getHeight());
         batch.end();
@@ -82,26 +98,55 @@ public class LoginView implements Screen, Input.TextInputListener {
         batch.draw(login, 200, 250, login.getWidth(), login.getHeight());
         text.draw(batch, username + "\n\n" + password, 350, 525);
         batch.end();
+    }
 
-        if (isMute) {
-            batch.begin();
-            batch.draw(mute, 10, 730, mute.getWidth(), mute.getHeight());
-            music.pause();
-            batch.end();
-        } else {
-            batch.begin();
-            batch.draw(unmute, 10, 730, unmute.getWidth(), unmute.getHeight());
-            music.play();
-            batch.end();
-        }
-
-        if (Gdx.input.justTouched()) {
-            if (Gdx.input.getX() > 10 && Gdx.input.getX() < 10 + mute.getWidth()
-                    && Gdx.input.getY() < 70 && Gdx.input.getY() > 70 - mute.getHeight()) {
-                isMute = !isMute;
+    private void back() {
+        if (Gdx.input.getY() > 790 - backButton.getHeight() && Gdx.input.getY() < 790) {
+            if (Gdx.input.getX() > 10 && Gdx.input.getX() < 10 + backButton.getWidth()) {
+                music.pause();
+                game.setScreen(new WelcomeMenuView(game));
+                dispose();
             }
         }
+    }
 
+    private void register() {
+        if (Gdx.input.getX() > 200 && Gdx.input.getX() < 200 + registerButtons.getWidth()) {
+            if (Gdx.input.getY() > 400 - registerButtons.getHeight() && Gdx.input.getY() < 400 - registerButtons.getHeight() / 2) {
+                isHolderUsername = true;
+                Gdx.input.getTextInput(this, "username", "", "");
+            }
+            if (Gdx.input.getY() > 400 - registerButtons.getHeight() / 2 && Gdx.input.getY() < 400) {
+                isHolderPassword = true;
+                Gdx.input.getTextInput(this, "password", "", "");
+            }
+        }
+    }
+
+    private void messageHandle() {
+        if (Gdx.input.getY() > 550 - login.getHeight() && Gdx.input.getY() < 550) {
+            if (Gdx.input.getX() > 200 && Gdx.input.getX() < 200 + login.getWidth()) {
+                if (username != null && password != null) {
+                    if (User.getUserByUsername(username) == null) {
+                        message = 2;
+                    } else {
+                        if (User.isPasswordCorrect(username, password)) {
+                            message = 3;
+                            music.pause();
+                            game.setScreen(new MainMenuView(game, User.getUserByUsername(username), isMute));
+                            dispose();
+                        } else {
+                            message = 4;
+                        }
+                    }
+                } else {
+                    message = 1;
+                }
+            }
+        }
+    }
+
+    private void printMessage() {
         if (message == 1) {
             batch.begin();
             text.draw(batch, "please complete fields.", 200, 380);
@@ -122,48 +167,25 @@ public class LoginView implements Screen, Input.TextInputListener {
             text.draw(batch, "password is incorrect!", 200, 380);
             batch.end();
         }
+    }
 
-        if (Gdx.input.isTouched()) {
-            if (Gdx.input.getY() > 790 - backButton.getHeight() && Gdx.input.getY() < 790) {
-                if (Gdx.input.getX() > 10 && Gdx.input.getX() < 10 + backButton.getWidth()) {
-                    music.pause();
-                    game.setScreen(new WelcomeMenuView(game));
-                    dispose();
-                }
-            }
+    private void handleMute() {
+        if (isMute) {
+            batch.begin();
+            batch.draw(mute, 10, 730, mute.getWidth(), mute.getHeight());
+            music.pause();
+            batch.end();
+        } else {
+            batch.begin();
+            batch.draw(unmute, 10, 730, unmute.getWidth(), unmute.getHeight());
+            music.play();
+            batch.end();
+        }
 
-            if (Gdx.input.justTouched()) {
-                if (Gdx.input.getX() > 200 && Gdx.input.getX() < 200 + registerButtons.getWidth()) {
-                    if (Gdx.input.getY() > 400 - registerButtons.getHeight() && Gdx.input.getY() < 400 - registerButtons.getHeight() / 2) {
-                        isHolderUsername = true;
-                        Gdx.input.getTextInput(this, "username", "", "");
-                    }
-                    if (Gdx.input.getY() > 400 - registerButtons.getHeight() / 2 && Gdx.input.getY() < 400) {
-                        isHolderPassword = true;
-                        Gdx.input.getTextInput(this, "password", "", "");
-                    }
-                }
-
-                if (Gdx.input.getY() > 550 - login.getHeight() && Gdx.input.getY() < 550) {
-                    if (Gdx.input.getX() > 200 && Gdx.input.getX() < 200 + login.getWidth()) {
-                        if (username != null && password != null) {
-                            if (User.getUserByUsername(username) == null) {
-                                message = 2;
-                            } else {
-                                if (User.isPasswordCorrect(username, password)) {
-                                    message = 3;
-                                    music.pause();
-                                    game.setScreen(new MainMenuView(game, User.getUserByUsername(username), isMute));
-                                    dispose();
-                                } else {
-                                    message = 4;
-                                }
-                            }
-                        } else {
-                            message = 1;
-                        }
-                    }
-                }
+        if (Gdx.input.justTouched()) {
+            if (Gdx.input.getX() > 10 && Gdx.input.getX() < 10 + mute.getWidth()
+                    && Gdx.input.getY() < 70 && Gdx.input.getY() > 70 - mute.getHeight()) {
+                isMute = !isMute;
             }
         }
     }

@@ -48,14 +48,7 @@ public class ScoreboardView implements Screen {
 
     @Override
     public void render(float delta) {
-        ScreenUtils.clear(0, 0, 0, 1);
-
-        camera.update();
-        game.batch.setProjectionMatrix(camera.combined);
-
-        batch.begin();
-        batch.draw(backButton, 10, 10, backButton.getWidth(), backButton.getHeight());
-        batch.end();
+        initial();
 
         batch.begin();
         text.draw(batch, "Scoreboard : ", 200, 700);
@@ -63,31 +56,16 @@ public class ScoreboardView implements Screen {
         highScores.sort(new SortScore());
         Score.sortAllScores(highScores);
         if (highScores.size() > 10) {
-            int i = 1, j = 0;
-            for (int counter = highScores.size() - 1; counter >= highScores.size() - 10; counter--) {
-                text.draw(batch, i + "- " + highScores.get(counter).getOwner().getUsername() + " - score : " + highScores.get(counter).getScore(), 200, 650 - 50 * j);
-                if (highScores.get(counter).getScore() != highScores.get(counter - 1).getScore()) {
-                    i++;
-                }
-                j++;
-            }
+            printOver10(highScores);
         } else {
-            if (highScores.size() > 0) {
-                int i = 1, j = 0;
-                for (int counter = highScores.size() - 1; counter >= 0; counter--) {
-                    text.draw(batch, i + "- " + highScores.get(counter).getOwner().getUsername() + " - score : " + highScores.get(counter).getScore(), 200, 650 - 50 * j);
-                    if (counter - 1 >= 0) {
-                        if (highScores.get(counter).getScore() != highScores.get(counter - 1).getScore()) {
-                            i++;
-                        }
-                    }
-                    j++;
-                }
-            }
+            printUnder10(highScores);
         }
         batch.end();
+        back();
 
+    }
 
+    private void back() {
         if (Gdx.input.justTouched()) {
             if (Gdx.input.getY() > 790 - backButton.getHeight() && Gdx.input.getY() < 790) {
                 if (Gdx.input.getX() > 10 && Gdx.input.getX() < 10 + backButton.getWidth()) {
@@ -96,7 +74,43 @@ public class ScoreboardView implements Screen {
                 }
             }
         }
+    }
 
+    private void initial() {
+        ScreenUtils.clear(0, 0, 0, 1);
+
+        camera.update();
+        game.batch.setProjectionMatrix(camera.combined);
+
+        batch.begin();
+        batch.draw(backButton, 10, 10, backButton.getWidth(), backButton.getHeight());
+        batch.end();
+    }
+
+    private void printUnder10(ArrayList<Score> highScores) {
+        if (highScores.size() > 0) {
+            int i = 1, j = 0;
+            for (int counter = highScores.size() - 1; counter >= 0; counter--) {
+                text.draw(batch, i + "- " + highScores.get(counter).getOwner().getUsername() + " - score : " + highScores.get(counter).getScore(), 200, 650 - 50 * j);
+                if (counter - 1 >= 0) {
+                    if (highScores.get(counter).getScore() != highScores.get(counter - 1).getScore()) {
+                        i++;
+                    }
+                }
+                j++;
+            }
+        }
+    }
+
+    private void printOver10(ArrayList<Score> highScores) {
+        int i = 1, j = 0;
+        for (int counter = highScores.size() - 1; counter >= highScores.size() - 10; counter--) {
+            text.draw(batch, i + "- " + highScores.get(counter).getOwner().getUsername() + " - score : " + highScores.get(counter).getScore(), 200, 650 - 50 * j);
+            if (highScores.get(counter).getScore() != highScores.get(counter - 1).getScore()) {
+                i++;
+            }
+            j++;
+        }
     }
 
     @Override

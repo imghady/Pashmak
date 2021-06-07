@@ -12,7 +12,7 @@ public class Score {
 
     public static ArrayList allScores = new ArrayList<>();
 
-    public Score (int score, String user) {
+    public Score(int score, String user) {
         this.owner = user;
         this.score = score;
         if (allScores == null) {

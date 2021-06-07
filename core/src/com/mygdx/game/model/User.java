@@ -17,14 +17,14 @@ public class User {
     private int LastGameHealth = 0;
     private int[][] lastGameMap;
 
-    public User (String username, String password) throws IOException {
+    public User(String username, String password) throws IOException {
         this.username = username;
         this.password = password;
         allUsers.add(this);
         Finisher.finish();
     }
 
-    public boolean isNewHighScore (int newScore) {
+    public boolean isNewHighScore(int newScore) {
         if (newScore > this.highScore) {
             this.highScore = newScore;
             return true;
@@ -57,7 +57,7 @@ public class User {
         this.password = password;
     }
 
-    public static boolean isPasswordCorrect (String username, String password) {
+    public static boolean isPasswordCorrect(String username, String password) {
         User user = User.getUserByUsername(username);
         assert user != null;
         return password.equals(user.getPassword());

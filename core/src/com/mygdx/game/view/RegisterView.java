@@ -63,10 +63,26 @@ public class RegisterView implements Screen, Input.TextInputListener {
         camera.update();
         game.batch.setProjectionMatrix(camera.combined);
 
+        prints();
+        printMute();
+        printMessage();
+
+        if (Gdx.input.isTouched()) {
+            back();
+
+            if (Gdx.input.justTouched()) {
+                register();
+                messageHandle();
+                mute();
+            }
+
+        }
+    }
+
+    private void prints() {
         batch.begin();
         batch.draw(backButton, 10, 10, backButton.getWidth(), backButton.getHeight());
         batch.end();
-
 
         batch.begin();
         text.draw(batch, "Register Menu\ncomplete fields to register", 200, 700);
@@ -81,7 +97,9 @@ public class RegisterView implements Screen, Input.TextInputListener {
         batch.draw(register, 250, 250, register.getWidth(), register.getHeight());
         text.draw(batch, username + "\n\n" + password, 350, 525);
         batch.end();
+    }
 
+    private void printMute() {
         if (isMute) {
             batch.begin();
             batch.draw(mute, 10, 730, mute.getWidth(), mute.getHeight());
@@ -93,8 +111,55 @@ public class RegisterView implements Screen, Input.TextInputListener {
             music.play();
             batch.end();
         }
+    }
 
+    private void back() {
+        if (Gdx.input.getY() > 790 - backButton.getHeight() && Gdx.input.getY() < 790) {
+            if (Gdx.input.getX() > 10 && Gdx.input.getX() < 10 + backButton.getWidth()) {
+                music.pause();
+                game.setScreen(new WelcomeMenuView(game));
+                dispose();
+            }
+        }
+    }
 
+    private void mute() {
+        if (Gdx.input.getX() > 10 && Gdx.input.getX() < 10 + mute.getWidth()
+                && Gdx.input.getY() < 70 && Gdx.input.getY() > 70 - mute.getHeight()) {
+            isMute = !isMute;
+        }
+    }
+
+    private void register() {
+        if (Gdx.input.getX() > 200 && Gdx.input.getX() < 200 + registerButtons.getWidth()) {
+            if (Gdx.input.getY() > 400 - registerButtons.getHeight() && Gdx.input.getY() < 400 - registerButtons.getHeight() / 2) {
+                isHolderUsername = true;
+                Gdx.input.getTextInput(this, "username", "", "");
+            }
+            if (Gdx.input.getY() > 400 - registerButtons.getHeight() / 2 && Gdx.input.getY() < 400) {
+                isHolderPassword = true;
+                Gdx.input.getTextInput(this, "password", "", "");
+            }
+        }
+    }
+
+    private void messageHandle() {
+        if (Gdx.input.getY() > 550 - register.getHeight() && Gdx.input.getY() < 550) {
+            if (Gdx.input.getX() > 250 && Gdx.input.getX() < 250 + register.getWidth()) {
+                if (username != null && password != null) {
+                    if (User.getUserByUsername(username) == null) {
+                        message = 2;
+                    } else {
+                        message = 3;
+                    }
+                } else {
+                    message = 1;
+                }
+            }
+        }
+    }
+
+    private void printMessage() {
         if (message == 1) {
             batch.begin();
             text.draw(batch, "please complete fields.", 200, 380);
@@ -117,52 +182,6 @@ public class RegisterView implements Screen, Input.TextInputListener {
             text.setColor(Color.RED);
             text.draw(batch, "username : " + username + " is already exists!", 200, 380);
             batch.end();
-        }
-
-
-        if (Gdx.input.isTouched()) {
-            if (Gdx.input.getY() > 790 - backButton.getHeight() && Gdx.input.getY() < 790) {
-                if (Gdx.input.getX() > 10 && Gdx.input.getX() < 10 + backButton.getWidth()) {
-                    music.pause();
-                    game.setScreen(new WelcomeMenuView(game));
-                    dispose();
-                }
-            }
-
-            if (Gdx.input.justTouched()) {
-                if (Gdx.input.getX() > 200 && Gdx.input.getX() < 200 + registerButtons.getWidth()) {
-                    if (Gdx.input.getY() > 400 - registerButtons.getHeight() && Gdx.input.getY() < 400 - registerButtons.getHeight() / 2) {
-                        isHolderUsername = true;
-                        Gdx.input.getTextInput(this, "username", "", "");
-                    }
-                    if (Gdx.input.getY() > 400 - registerButtons.getHeight() / 2 && Gdx.input.getY() < 400) {
-                        isHolderPassword = true;
-                        Gdx.input.getTextInput(this, "password", "", "");
-                    }
-                }
-
-                if (Gdx.input.getY() > 550 - register.getHeight() && Gdx.input.getY() < 550) {
-                    if (Gdx.input.getX() > 250 && Gdx.input.getX() < 250 + register.getWidth()) {
-                        if (username != null && password != null) {
-                            if (User.getUserByUsername(username) == null) {
-                                message = 2;
-                            } else {
-                                message = 3;
-                            }
-                        } else {
-                            message = 1;
-                        }
-                    }
-                }
-
-                if (Gdx.input.getX() > 10 && Gdx.input.getX() < 10 + mute.getWidth()
-                        && Gdx.input.getY() < 70 && Gdx.input.getY() > 70 - mute.getHeight()) {
-                    isMute = !isMute;
-                }
-
-            }
-
-
         }
     }
 

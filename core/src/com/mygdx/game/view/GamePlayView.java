@@ -1,8 +1,6 @@
 package com.mygdx.game.view;
 
 import java.io.IOException;
-import java.time.LocalTime;
-import java.util.Iterator;
 import java.lang.Math;
 
 import com.badlogic.gdx.Gdx;
@@ -21,6 +19,7 @@ import com.badlogic.gdx.utils.ScreenUtils;
 import com.mygdx.game.Pashmak;
 import com.badlogic.gdx.math.Rectangle;
 import com.mygdx.game.controller.Finisher;
+import com.mygdx.game.model.Map;
 import com.mygdx.game.model.User;
 
 public class GamePlayView implements Screen {
@@ -75,9 +74,11 @@ public class GamePlayView implements Screen {
     int direction3 = 0;
     int direction4 = 0;
     boolean isHardMode = false;
+    Texture backButton;
 
 
     int[][] map;
+    int[][] mapHolder = new int[8][10];
 
 
     public GamePlayView(Pashmak pashmak, User currentLoggedInUser, boolean isMute, int[][] map, int health, boolean isHardMode, int score) {
@@ -85,6 +86,11 @@ public class GamePlayView implements Screen {
         this.isHardMode = isHardMode;
         this.health = health;
         this.map = map;
+        for (int i = 0; i < 8; i++) {
+            for (int j = 0; j < 10; j++) {
+                mapHolder[i][j] = map[i][j];
+            }
+        }
         this.currentLoggedInUser = currentLoggedInUser;
         this.isMute = isMute;
         text = new BitmapFont(Gdx.files.internal("times.fnt"));
@@ -140,7 +146,7 @@ public class GamePlayView implements Screen {
         bananaEat = Gdx.audio.newSound(Gdx.files.internal("bananaeat.wav"));
         pineappleEat = Gdx.audio.newSound(Gdx.files.internal("pineappleeat.wav"));
         scream = Gdx.audio.newMusic(Gdx.files.internal("scream.mp3"));
-
+        backButton = new Texture("back.png");
     }
 
 
@@ -179,6 +185,8 @@ public class GamePlayView implements Screen {
                     checkForKillGhost();
                     checkForEndOfHyperMode();
                     saveGame();
+                    handleBack();
+                    handleEmptyMap();
 
                 } else {
 
@@ -202,7 +210,8 @@ public class GamePlayView implements Screen {
                     checkForPause();
                     checkForEndAndHurt();
                     saveGame();
-
+                    handleEmptyMap();
+                    handleBack();
                 }
                 break;
 
@@ -219,6 +228,31 @@ public class GamePlayView implements Screen {
 
     }
 
+    private void handleEmptyMap() {
+        if (isMapEmpty()) {
+            music.pause();
+            game.setScreen(new GamePlayView(game, currentLoggedInUser, isMute, mapHolder, health + 1, isHardMode, score));
+            dispose();
+        }
+    }
+
+    private void handleBack() {
+        if (Gdx.input.justTouched()) {
+            if (Gdx.input.getY() > 790 - backButton.getHeight() && Gdx.input.getY() < 790) {
+                if (Gdx.input.getX() > 10 && Gdx.input.getX() < 10 + backButton.getWidth()) {
+                    if (currentLoggedInUser == null) {
+                        music.pause();
+                        game.setScreen(new WelcomeMenuView(game));
+                    } else {
+                        music.pause();
+                        game.setScreen(new MainMenuView(game, currentLoggedInUser, isMute));
+                    }
+                    dispose();
+                }
+            }
+        }
+    }
+
     private void saveGame() {
         if (currentLoggedInUser != null) {
             currentLoggedInUser.setLastGameHealth(health);
@@ -230,6 +264,17 @@ public class GamePlayView implements Screen {
                 e.printStackTrace();
             }
         }
+    }
+
+    private boolean isMapEmpty() {
+        for (int i = 0; i < 8; i++) {
+            for (int j = 0; j < 10; j++) {
+                if (map[i][j] == 7 || map[i][j] == 0) {
+                    return false;
+                }
+            }
+        }
+        return true;
     }
 
     private void handleMusic() {
@@ -335,6 +380,7 @@ public class GamePlayView implements Screen {
 
         batch.begin();
         batch.draw(stop, 720, 730, stop.getWidth(), stop.getHeight());
+        batch.draw(backButton, 10, 10, backButton.getWidth(), backButton.getHeight());
         batch.end();
     }
 
@@ -699,7 +745,7 @@ public class GamePlayView implements Screen {
         direction4 = 0;
         for (Rectangle wall : bricks) {
             if (wall.overlaps(pacman)) {
-                if (Math.abs(pacman.x - wall.x) < 40) {
+                if (Math.abs(pacman.x - wall.x) < 50) {
                     if (pacman.y > wall.y) {
                         direction3 = 3;
 
@@ -708,7 +754,7 @@ public class GamePlayView implements Screen {
                         direction1 = 1;
                     }
                 }
-                if (Math.abs(pacman.y - wall.y) < 40) {
+                if (Math.abs(pacman.y - wall.y) < 50) {
                     if (pacman.x > wall.x) {
                         direction2 = 2;
 
