@@ -13,6 +13,9 @@ public class User {
     private String username;
     private String password;
     private int highScore = 0;
+    private int lastGameScore = 0;
+    private int LastGameHealth = 0;
+    private int[][] lastGameMap;
 
     public User (String username, String password) throws IOException {
         this.username = username;
@@ -83,5 +86,29 @@ public class User {
 
     public void setHighScore(int highScore) {
         this.highScore = highScore;
+    }
+
+    public int getLastGameScore() {
+        return lastGameScore;
+    }
+
+    public void setLastGameScore(int lastGameScore) {
+        this.lastGameScore = lastGameScore;
+    }
+
+    public int getLastGameHealth() {
+        return LastGameHealth;
+    }
+
+    public void setLastGameHealth(int lastGameHealth) {
+        LastGameHealth = lastGameHealth;
+    }
+
+    public int[][] getLastGameMap() {
+        return lastGameMap;
+    }
+
+    public void setLastGameMap(int[][] lastGameMap) {
+        this.lastGameMap = lastGameMap;
     }
 }

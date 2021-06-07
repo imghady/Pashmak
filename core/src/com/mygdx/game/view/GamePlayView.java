@@ -1,5 +1,6 @@
 package com.mygdx.game.view;
 
+import java.io.IOException;
 import java.time.LocalTime;
 import java.util.Iterator;
 import java.lang.Math;
@@ -18,6 +19,7 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.mygdx.game.Pashmak;
 import com.badlogic.gdx.math.Rectangle;
+import com.mygdx.game.controller.Finisher;
 import com.mygdx.game.model.User;
 
 public class GamePlayView implements Screen {
@@ -34,7 +36,7 @@ public class GamePlayView implements Screen {
     Texture banana;
     Array<Rectangle> bananas;
     int score = 0;
-    int health = 4;
+    int health;
     Texture ghost1Image;
     Rectangle ghost1;
     Texture ghost2Image;
@@ -71,38 +73,17 @@ public class GamePlayView implements Screen {
     int direction2 = 0;
     int direction3 = 0;
     int direction4 = 0;
+    boolean isHardMode = false;
 
 
-    int[][] map1 = {{1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
-            {0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-            {0, 1, 1, 0, 1, 0, 1, 1, 0, 0},
-            {0, 0, 0, 0, 1, 0, 0, 0, 0, 0},
-            {0, 0, 0, 0, 1, 0, 0, 0, 0, 0},
-            {0, 1, 1, 0, 1, 0, 1, 1, 0, 0},
-            {0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-            {1, 1, 1, 1, 1, 1, 1, 1, 1, 1}};
+    int[][] map;
 
 
-    int[][] map2 = {{1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
-            {0, 0, 7, 0, 0, 0, 0, 0, 0, 0},
-            {0, 1, 1, 0, 1, 0, 1, 1, 0, 0},
-            {0, 0, 1, 0, 1, 0, 0, 0, 0, 1},
-            {0, 0, 0, 0, 1, 0, 1, 0, 0, 0},
-            {1, 1, 1, 0, 1, 0, 1, 1, 7, 0},
-            {0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-            {1, 1, 1, 1, 1, 1, 1, 1, 1, 1}};
-
-    int[][] map = {{1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
-            {0, 0, 7, 0, 0, 0, 0, 0, 0, 0},
-            {0, 1, 1, 0, 1, 0, 1, 1, 0, 0},
-            {0, 1, 1, 0, 1, 0, 0, 0, 0, 1},
-            {0, 0, 0, 0, 0, 0, 1, 0, 0, 0},
-            {1, 0, 1, 0, 1, 0, 1, 1, 0, 0},
-            {0, 0, 0, 0, 0, 0, 0, 7, 0, 0},
-            {1, 1, 1, 1, 1, 1, 1, 1, 1, 1}};
-
-
-    public GamePlayView(Pashmak pashmak, User currentLoggedInUser, boolean isMute) {
+    public GamePlayView(Pashmak pashmak, User currentLoggedInUser, boolean isMute, int[][] map, int health, boolean isHardMode, int score) {
+        this.score = score;
+        this.isHardMode = isHardMode;
+        this.health = health;
+        this.map = map;
         this.currentLoggedInUser = currentLoggedInUser;
         this.isMute = isMute;
         text = new BitmapFont(Gdx.files.internal("times.fnt"));
@@ -180,12 +161,15 @@ public class GamePlayView implements Screen {
                     handleMusic();
                     printMap();
                     printGhostsHyperMode();
-                    ghostsDirection();
+                    if (isHardMode) {
+                        ghostsDirectionHardModeAndHyper();
+                    } else {
+                        ghostsDirection();
+                    }
                     ghost1Move();
                     ghost2Move();
                     ghost3Move();
                     ghost4Move();
-
                     wallBlock();
                     pacmanMove();
                     setEdges();
@@ -193,14 +177,19 @@ public class GamePlayView implements Screen {
                     checkForPause();
                     checkForKillGhost();
                     checkForEndOfHyperMode();
-
+                    saveGame();
+                    
                 } else {
 
                     initial();
                     handleMusic();
                     printMap();
                     printGhosts();
-                    ghostsDirection();
+                    if (isHardMode) {
+                        ghostsDirectionHardMode();
+                    } else {
+                        ghostsDirection();
+                    }
                     ghost1Move();
                     ghost2Move();
                     ghost3Move();
@@ -211,6 +200,7 @@ public class GamePlayView implements Screen {
                     increaseScore();
                     checkForPause();
                     checkForEndAndHurt();
+                    saveGame();
 
                 }
                 break;
@@ -226,6 +216,19 @@ public class GamePlayView implements Screen {
                 break;
         }
 
+    }
+
+    private void saveGame() {
+        if (currentLoggedInUser != null) {
+            currentLoggedInUser.setLastGameHealth(health);
+            currentLoggedInUser.setLastGameScore(score);
+            currentLoggedInUser.setLastGameMap(map);
+            try {
+                Finisher.finish();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     private void handleMusic() {
@@ -341,6 +344,130 @@ public class GamePlayView implements Screen {
         }
     }
 
+    private void ghostsDirectionHardMode() {
+
+
+        if (Math.abs(ghost1.x - pacman.x) < Math.abs(ghost1.y - pacman.y)) {
+            if (pacman.y > ghost1.y) {
+                side1 = 3;
+            } else {
+                side1 = 2;
+            }
+        } else {
+            if (pacman.x > ghost1.x) {
+                side1 = 1;
+            } else {
+                side1 = 0;
+            }
+        }
+
+        if (Math.abs(ghost2.x - pacman.x) < Math.abs(ghost2.y - pacman.y)) {
+            if (pacman.y > ghost2.y) {
+                side2 = 3;
+            } else {
+                side2 = 2;
+            }
+        } else {
+            if (pacman.x > ghost2.x) {
+                side2 = 1;
+            } else {
+                side2 = 0;
+            }
+        }
+
+        if (Math.abs(ghost3.x - pacman.x) < Math.abs(ghost3.y - pacman.y)) {
+            if (pacman.y > ghost3.y) {
+                side3 = 3;
+            } else {
+                side3 = 2;
+            }
+        } else {
+            if (pacman.x > ghost3.x) {
+                side3 = 1;
+            } else {
+                side3 = 0;
+            }
+        }
+
+        if (Math.abs(ghost4.x - pacman.x) < Math.abs(ghost4.y - pacman.y)) {
+            if (pacman.y > ghost4.y) {
+                side4 = 3;
+            } else {
+                side4 = 2;
+            }
+        } else {
+            if (pacman.x > ghost4.x) {
+                side4 = 1;
+            } else {
+                side4 = 0;
+            }
+        }
+
+
+    }
+
+    private void ghostsDirectionHardModeAndHyper() {
+
+
+        if (Math.abs(ghost1.x - pacman.x) < Math.abs(ghost1.y - pacman.y)) {
+            if (pacman.y > ghost1.y) {
+                side1 = 2;
+            } else {
+                side1 = 3;
+            }
+        } else {
+            if (pacman.x > ghost1.x) {
+                side1 = 0;
+            } else {
+                side1 = 1;
+            }
+        }
+
+        if (Math.abs(ghost2.x - pacman.x) < Math.abs(ghost2.y - pacman.y)) {
+            if (pacman.y > ghost2.y) {
+                side2 = 2;
+            } else {
+                side2 = 3;
+            }
+        } else {
+            if (pacman.x > ghost2.x) {
+                side2 = 0;
+            } else {
+                side2 = 1;
+            }
+        }
+
+        if (Math.abs(ghost3.x - pacman.x) < Math.abs(ghost3.y - pacman.y)) {
+            if (pacman.y > ghost3.y) {
+                side3 = 2;
+            } else {
+                side3 = 3;
+            }
+        } else {
+            if (pacman.x > ghost3.x) {
+                side3 = 0;
+            } else {
+                side3 = 1;
+            }
+        }
+
+        if (Math.abs(ghost4.x - pacman.x) < Math.abs(ghost4.y - pacman.y)) {
+            if (pacman.y > ghost4.y) {
+                side4 = 2;
+            } else {
+                side4 = 3;
+            }
+        } else {
+            if (pacman.x > ghost4.x) {
+                side4 = 0;
+            } else {
+                side4 = 1;
+            }
+        }
+
+
+    }
+
     private void ghost4Move() {
         int ghost4Direction1 = 0;
         int ghost4Direction2 = 0;
@@ -421,7 +548,7 @@ public class GamePlayView implements Screen {
                 }
                 if (Math.abs(ghost2.y - wall.y) < 41) {
                     if (ghost2.x > wall.x) {
-                        ghost2Direction2= 2;
+                        ghost2Direction2 = 2;
 
                     } else {
                         ghost2Direction4 = 4;
@@ -437,7 +564,7 @@ public class GamePlayView implements Screen {
 
     private void ghost1Move() {
         int ghost1Direction1 = 0;
-        int ghost1Direction2= 0;
+        int ghost1Direction2 = 0;
         int ghost1Direction3 = 0;
         int ghost1Direction4 = 0;
         for (Rectangle wall : bricks) {

@@ -10,6 +10,7 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.mygdx.game.Pashmak;
+import com.mygdx.game.model.Map;
 
 public class WelcomeMenuView extends Game implements Screen {
 
@@ -114,7 +115,7 @@ public class WelcomeMenuView extends Game implements Screen {
             if (Gdx.input.getX() > 300 && Gdx.input.getX() < 300 + play.getWidth()
                     && Gdx.input.getY() < 450 && Gdx.input.getY() > 450 - play.getHeight()) {
                 music.pause();
-                game.setScreen(new GamePlayView(game, null, isMute));
+                game.setScreen(new StartGameView(game, null, isMute));
                 dispose();
             }
 
