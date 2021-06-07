@@ -10,6 +10,7 @@ import com.badlogic.gdx.Input;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.audio.Sound;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
@@ -178,7 +179,7 @@ public class GamePlayView implements Screen {
                     checkForKillGhost();
                     checkForEndOfHyperMode();
                     saveGame();
-                    
+
                 } else {
 
                     initial();
@@ -326,6 +327,10 @@ public class GamePlayView implements Screen {
         batch.end();
         batch.begin();
         text.draw(batch, "score : " + score + "\nhealth : " + health, 100, 790);
+        if (isHardMode) {
+            text.setColor(Color.RED);
+            text.draw(batch, "HARD MODE!" + health, 300, 790);
+        }
         batch.end();
 
         batch.begin();

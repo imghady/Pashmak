@@ -32,6 +32,8 @@ public class StartGameView  implements Screen, Input.TextInputListener {
     int message = 0;
     boolean isHardMode = false;
     Texture lastGame;
+    Texture regular;
+    Texture hard;
 
     public StartGameView(Pashmak pashmak, User currentLoggedInUser, boolean isMute) {
         this.user = currentLoggedInUser;
@@ -47,6 +49,8 @@ public class StartGameView  implements Screen, Input.TextInputListener {
         backButton = new Texture("back.png");
         health = new Texture("health.png");
         lastGame = new Texture("lastgame.png");
+        hard = new Texture("hard.png");
+        regular = new Texture("regular.png");
     }
 
 
@@ -87,10 +91,27 @@ public class StartGameView  implements Screen, Input.TextInputListener {
             batch.end();
         }
 
+        if (isHardMode) {
+            batch.begin();
+            batch.draw(hard, 600, 10, hard.getWidth(), hard.getHeight());
+            batch.end();
+        } else {
+            batch.begin();
+            batch.draw(regular, 600, 10, regular.getWidth(), regular.getHeight());
+            batch.end();
+        }
+
         if (Gdx.input.justTouched()) {
             if (Gdx.input.getX() > 10 && Gdx.input.getX() < 10 + mute.getWidth()
                     && Gdx.input.getY() < 70 && Gdx.input.getY() > 70 - mute.getHeight()) {
                 isMute = !isMute;
+            }
+        }
+
+        if (Gdx.input.justTouched()) {
+            if (Gdx.input.getX() > 600 && Gdx.input.getX() < 600 + regular.getWidth()
+                    && Gdx.input.getY() < 790 && Gdx.input.getY() > 790 - regular.getHeight()) {
+                isHardMode = !isHardMode;
             }
         }
 
